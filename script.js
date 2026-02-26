@@ -1,4 +1,4 @@
-// Step 4: Inline error messages for booking form + stop submit if invalid
+// Step 5: Show success message + clear form (after passing validation)
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("bookingForm");
@@ -30,20 +30,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function validatePhone(value) {
     const digits = value.replace(/\D/g, "");
-    // phone is required in this booking form flow; adjust later if optional
-    return digits.length >= 10;
+    return digits.length >= 10; // booking form: require 10+ digits
   }
 
   function setError(el, message) {
+    if (!el) return;
     el.textContent = message;
   }
 
   function clearError(el) {
+    if (!el) return;
     el.textContent = "";
+  }
+
+  function clearAllErrors() {
+    clearError(nameErrorEl);
+    clearError(emailErrorEl);
+    clearError(phoneErrorEl);
+    clearError(messageErrorEl);
+  }
+
+  function showSuccess(message) {
+    if (!successEl) return;
+
+    successEl.textContent = message;
+
+    // Auto-hide after 4 seconds
+    window.clearTimeout(showSuccess._t);
+    showSuccess._t = window.setTimeout(() => {
+      successEl.textContent = "";
+    }, 4000);
   }
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
+
+    // Clear previous success message each submit
     if (successEl) successEl.textContent = "";
 
     const name = nameInput.value;
@@ -91,10 +113,11 @@ document.addEventListener("DOMContentLoaded", () => {
       clearError(messageErrorEl);
     }
 
-    // Stop here if errors exist (this is the “block submission” part)
     if (hasErrors) return;
 
-    // Step 5 will add success behavior + clearing, so for now just log
-    console.log("Booking form valid ✅ (Step 4)");
+    // ✅ Step 5 behavior: success + clear form
+    clearAllErrors();
+    form.reset();
+    showSuccess("Thanks! We’ll reach out soon to confirm your booking.");
   });
 });
