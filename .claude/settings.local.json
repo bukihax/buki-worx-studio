@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"C:\\\\Users\\\\ade-i\\\\buki-worx-studio\\\\.env\" << 'EOF'\nGEMINI_API_KEY=\nDATABASE_URL=\nSTRIPE_SECRET_KEY=\nEOF)",
+      "Bash(\"C:\\\\Users\\\\ade-i\\\\buki-worx-studio\\\\.env.example\" << 'EOF'\n# Gemini API Key for Google AI services\nGEMINI_API_KEY=your_gemini_api_key_here\n\n# Database connection URL\nDATABASE_URL=postgresql://user:password@localhost:5432/database_name\n\n# Stripe API Secret Key for payment processing\nSTRIPE_SECRET_KEY=sk_test_your_stripe_secret_key_here\nEOF)",
+      "Bash(npx @nanobanana/mcp:*)",
+      "Bash(python3:*)"
+    ]
+  }
+}

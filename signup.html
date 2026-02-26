@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Sign-Up</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .signup-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input[type="email"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        input[type="email"].error {
+            border-color: #e74c3c;
+            background-color: #fadbd8;
+        }
+
+        .success-message {
+            display: none;
+            background-color: #d5f4e6;
+            color: #27ae60;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .form-hidden {
+            display: none;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideOutDown {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+        }
+
+        .success-message.show {
+            animation: slideInUp 0.4s ease-out;
+        }
+
+        .success-message.hide {
+            animation: slideOutDown 0.4s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <h1>Stay Updated</h1>
+        <p>Subscribe to our newsletter for the latest updates and exclusive offers.</p>
+
+        <div class="success-message" id="successMessage">
+            ✓ Thank you! You've been added to our list.
+        </div>
+
+        <form id="signupForm" class="form-hidden">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    required
+                >
+                <div class="error-message" id="emailError"></div>
+            </div>
+            <button type="submit">Sign Up</button>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('signupForm');
+        const emailInput = document.getElementById('email');
+        const emailError = document.getElementById('emailError');
+        const successMessage = document.getElementById('successMessage');
+
+        // Show form initially
+        form.classList.remove('form-hidden');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Reset error states
+            emailError.classList.remove('show');
+            emailInput.classList.remove('error');
+
+            const email = emailInput.value.trim();
+
+            // Validate email
+            if (!email) {
+                emailError.textContent = 'Please enter an email address.';
+                emailError.classList.add('show');
+                emailInput.classList.add('error');
+                return;
+            }
+
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                emailError.textContent = 'Please enter a valid email address.';
+                emailError.classList.add('show');
+                emailInput.classList.add('error');
+                return;
+            }
+
+            // Success - show success message and hide form
+            form.classList.add('form-hidden');
+            successMessage.classList.add('show');
+
+            // Clear the input immediately
+            emailInput.value = '';
+
+            // Hide form after 3 seconds with animation
+            setTimeout(function() {
+                successMessage.classList.add('hide');
+
+                // Wait for animation to finish before resetting
+                setTimeout(function() {
+                    successMessage.classList.remove('show');
+                    successMessage.classList.remove('hide');
+                    emailInput.classList.remove('error');
+                    form.classList.remove('form-hidden');
+                }, 400);
+            }, 3000);
+        });
+
+        // Clear error when user starts typing
+        emailInput.addEventListener('input', function() {
+            if (emailError.classList.contains('show')) {
+                emailError.classList.remove('show');
+                emailInput.classList.remove('error');
+            }
+        });
+    </script>
+</body>
+</html>
