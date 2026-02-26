@@ -72,7 +72,41 @@
                         <button type="submit" class="cta-button">Send Message</button>
                     </form>
                 </div>
+<section class="booking-section">
+  <h2>Book a Class</h2>
+  <p>Send your request and we’ll confirm availability.</p>
 
+  <!-- Success message (empty by default) -->
+  <div id="formSuccess" class="form-success" aria-live="polite"></div>
+
+  <form id="bookingForm" novalidate>
+    <div class="field">
+      <label for="name">Name</label>
+      <input id="name" name="name" type="text" autocomplete="name" />
+      <div id="nameError" class="field-error"></div>
+    </div>
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="email" />
+      <div id="emailError" class="field-error"></div>
+    </div>
+
+    <div class="field">
+      <label for="phone">Phone</label>
+      <input id="phone" name="phone" type="tel" autocomplete="tel" />
+      <div id="phoneError" class="field-error"></div>
+    </div>
+
+    <div class="field">
+      <label for="message">Message</label>
+      <textarea id="message" name="message" rows="5"></textarea>
+      <div id="messageError" class="field-error"></div>
+    </div>
+
+    <button id="submitBtn" type="submit">Send Request</button>
+  </form>
+</section>
                 <!-- Contact Info -->
                 <div class="contact-info-section">
                     <h2>Contact Information</h2>
