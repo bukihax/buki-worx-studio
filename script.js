@@ -1,4 +1,4 @@
-// Step 5: Show success message + clear form (after passing validation)
+// Step 6: Polish & UX (disable button, styling hooks, cleaner success timeout)
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("bookingForm");
@@ -18,6 +18,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const phoneInput = document.getElementById("booking-phone");
   const messageInput = document.getElementById("booking-message");
 
+  // Button
+  const submitBtn = document.getElementById("submitBtn");
+
+  // Success timeout (clean pattern)
+  let successTimeout = null;
+
   // Validation helpers
   function validateRequired(value) {
     return value.trim().length > 0;
@@ -33,40 +39,53 @@ document.addEventListener("DOMContentLoaded", () => {
     return digits.length >= 10; // booking form: require 10+ digits
   }
 
-  function setError(el, message) {
-    if (!el) return;
-    el.textContent = message;
+  function setError(inputEl, errorEl, message) {
+    if (errorEl) errorEl.textContent = message;
+    if (inputEl) inputEl.classList.add("input-error");
   }
 
-  function clearError(el) {
-    if (!el) return;
-    el.textContent = "";
+  function clearError(inputEl, errorEl) {
+    if (errorEl) errorEl.textContent = "";
+    if (inputEl) inputEl.classList.remove("input-error");
   }
 
   function clearAllErrors() {
-    clearError(nameErrorEl);
-    clearError(emailErrorEl);
-    clearError(phoneErrorEl);
-    clearError(messageErrorEl);
+    clearError(nameInput, nameErrorEl);
+    clearError(emailInput, emailErrorEl);
+    clearError(phoneInput, phoneErrorEl);
+    clearError(messageInput, messageErrorEl);
   }
 
   function showSuccess(message) {
     if (!successEl) return;
 
     successEl.textContent = message;
+    successEl.classList.add("success-visible");
 
-    // Auto-hide after 4 seconds
-    window.clearTimeout(showSuccess._t);
-    showSuccess._t = window.setTimeout(() => {
+    // Make sure user sees it
+    successEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+    clearTimeout(successTimeout);
+    successTimeout = setTimeout(() => {
       successEl.textContent = "";
-    }, 4000);
+      successEl.classList.remove("success-visible");
+    }, 5500);
+  }
+
+  function setSubmitting(isSubmitting) {
+    if (!submitBtn) return;
+    submitBtn.disabled = isSubmitting;
+    submitBtn.classList.toggle("btn-disabled", isSubmitting);
+    submitBtn.textContent = isSubmitting ? "Sending..." : "Send Request";
   }
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
 
-    // Clear previous success message each submit
-    if (successEl) successEl.textContent = "";
+    if (successEl) {
+      successEl.textContent = "";
+      successEl.classList.remove("success-visible");
+    }
 
     const name = nameInput.value;
     const email = emailInput.value;
@@ -77,47 +96,53 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Name
     if (!validateRequired(name)) {
-      setError(nameErrorEl, "Name is required.");
+      setError(nameInput, nameErrorEl, "Name is required.");
       hasErrors = true;
     } else {
-      clearError(nameErrorEl);
+      clearError(nameInput, nameErrorEl);
     }
 
     // Email
     if (!validateRequired(email)) {
-      setError(emailErrorEl, "Email is required.");
+      setError(emailInput, emailErrorEl, "Email is required.");
       hasErrors = true;
     } else if (!validateEmail(email)) {
-      setError(emailErrorEl, "Enter a valid email address.");
+      setError(emailInput, emailErrorEl, "Enter a valid email address.");
       hasErrors = true;
     } else {
-      clearError(emailErrorEl);
+      clearError(emailInput, emailErrorEl);
     }
 
     // Phone
     if (!validateRequired(phone)) {
-      setError(phoneErrorEl, "Phone is required.");
+      setError(phoneInput, phoneErrorEl, "Phone is required.");
       hasErrors = true;
     } else if (!validatePhone(phone)) {
-      setError(phoneErrorEl, "Enter a valid phone number (10+ digits).");
+      setError(phoneInput, phoneErrorEl, "Enter a valid phone number (10+ digits).");
       hasErrors = true;
     } else {
-      clearError(phoneErrorEl);
+      clearError(phoneInput, phoneErrorEl);
     }
 
     // Message
     if (!validateRequired(message)) {
-      setError(messageErrorEl, "Message is required.");
+      setError(messageInput, messageErrorEl, "Message is required.");
       hasErrors = true;
     } else {
-      clearError(messageErrorEl);
+      clearError(messageInput, messageErrorEl);
     }
 
     if (hasErrors) return;
 
-    // ✅ Step 5 behavior: success + clear form
-    clearAllErrors();
-    form.reset();
-    showSuccess("Thanks! We’ll reach out soon to confirm your booking.");
+    // UX: disable during "submission"
+    setSubmitting(true);
+
+    // Simulate short processing time for UX (no backend)
+    setTimeout(() => {
+      clearAllErrors();
+      form.reset();
+      showSuccess("Thanks! We’ll reach out soon to confirm your booking.");
+      setSubmitting(false);
+    }, 350);
   });
 });

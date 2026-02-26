@@ -1241,3 +1241,31 @@ footer {
   margin: 24px auto;
   border-radius: 16px;
 }
+/* Step 6 polish: booking form UX */
+.field-error {
+  color: #b00020;
+  font-size: 0.9rem;
+  margin-top: 6px;
+  min-height: 18px;
+}
+
+.input-error {
+  border: 2px solid #b00020 !important;
+  outline: none;
+}
+
+.form-success {
+  min-height: 20px;
+  margin: 10px 0;
+  padding: 10px;
+}
+
+.success-visible {
+  border: 2px solid #1b7f3a;
+  background: rgba(27, 127, 58, 0.08);
+}
+
+.btn-disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
