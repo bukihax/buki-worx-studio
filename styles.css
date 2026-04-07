@@ -190,16 +190,12 @@ header {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    min-height: 100vh;
-    margin-top: 60px;
+    height: 100vh;
+    margin-top: 0;
     padding: 6rem 2rem;
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
-    background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&h=800&fit=crop');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    background: #0f0f0f;
 }
 
 .hero-video {
@@ -257,7 +253,7 @@ header {
 
 @media (max-width: 768px) {
     .hero {
-        margin-top: 60px;
+        margin-top: 0;
         padding: 4rem 1.5rem;
         min-height: 100vh;
         align-items: center;
@@ -286,7 +282,7 @@ header {
 
 @media (max-width: 480px) {
     .hero {
-        margin-top: 60px;
+        margin-top: 0;
         padding: 2.5rem 1rem;
         min-height: 100vh;
         display: flex;
@@ -349,6 +345,25 @@ header {
     position: relative;
     z-index: 1;
     animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+.page-hero--image {
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.page-hero--image::before {
+    display: none;
+}
+
+.page-hero--image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.48);
+    z-index: 0;
 }
 
 @keyframes fadeInUp {
@@ -1110,7 +1125,7 @@ footer {
     }
 
     .hero {
-        margin-top: 60px;
+        margin-top: 0;
         padding: 3rem 1.5rem;
         min-height: auto;
     }
@@ -1161,7 +1176,7 @@ footer {
     }
 
     .hero {
-        margin-top: 60px;
+        margin-top: 0;
         padding: 2rem 1rem;
         min-height: auto;
     }

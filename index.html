@@ -21,17 +21,11 @@
             </div>
         </nav>
     </header>
-ffeature
     <main>
-                <!-- Hero Section -->
+        <!-- Hero Section -->
         <section class="hero">
-            <video class="hero-video" autoplay muted loop playsinline>
+            <video class="hero-video" id="heroVideo" autoplay muted playsinline>
                 <source src="images/BUKI-WORX.mp4" type="video/mp4">
-                <section class="hero-media"> <img src="images/ai-hero.png"
-  alt="BUKI-WORX Studio empowering boutique fitness environment" />
-</div>
-
-                <p>Your browser does not support HTML5 video. <a href="images/BUKI-WORX.mp4">Download the video</a> instead.</p>
             </video>
             <div class="hero-overlay"></div>
             <div class="hero-content">
@@ -95,5 +89,21 @@ ffeature
             <p>&copy; 2025 BUKI-WORX STUDIO. All rights reserved.</p>
         </div>
     </footer>
+    <script src="script.js"></script>
+    <script>
+        const vid = document.getElementById('heroVideo');
+        const START = 3;
+        const END = 20;
+
+        vid.addEventListener('loadedmetadata', function () {
+            vid.currentTime = START;
+        });
+
+        vid.addEventListener('timeupdate', function () {
+            if (vid.currentTime >= END) {
+                vid.currentTime = START;
+            }
+        });
+    </script>
 </body>
 </html>
