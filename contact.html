@@ -32,81 +32,49 @@
             <div class="contact-wrapper">
                 <!-- Contact Form -->
                 <div class="contact-form-section">
-                    <h2>Send us a Message</h2>
-                    <form class="contact-form">
+                    <h2>Send a Message</h2>
+                    <form id="contact-form" class="contact-form" novalidate>
+
                         <div class="form-group">
-                            <label for="name">Name *</label>
-                            <input type="text" id="name" name="name" required aria-required="true" placeholder="Your name">
+                            <label for="name">Your Name</label>
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                placeholder="Enter your full name"
+                            />
+                            <span class="field-error" id="name-error"></span>
                         </div>
 
                         <div class="form-group">
-                            <label for="email">Email *</label>
-                            <input type="email" id="email" name="email" required aria-required="true" placeholder="your@email.com">
+                            <label for="email">Your Email</label>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="you@example.com"
+                            />
+                            <span class="field-error" id="email-error"></span>
                         </div>
 
                         <div class="form-group">
-                            <label for="phone">Phone (Optional)</label>
-                            <input type="tel" id="phone" name="phone" placeholder="(123) 456-7890">
+                            <label for="message">Your Message</label>
+                            <textarea
+                                id="message"
+                                name="message"
+                                rows="5"
+                                placeholder="Tell us what you're looking for..."
+                            ></textarea>
+                            <span class="field-error" id="message-error"></span>
                         </div>
 
-                        <div class="form-group">
-                            <label for="interested-in">Interested In *</label>
-                            <select id="interested-in" name="interested-in" required aria-required="true">
-                                <option value="">-- Select an option --</option>
-                                <option value="intro-class">Intro to Pole Class</option>
-                                <option value="pole-fitness">Pole Fitness Class</option>
-                                <option value="heels-class">Heels Class</option>
-                                <option value="silks">Silks Class</option>
-                                <option value="glutes-abs">Glutes & Abs Class</option>
-                                <option value="private-booking">Private Class Booking</option>
-                                <option value="membership">Membership Info</option>
-                                <option value="other">Other Inquiry</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="message">Message *</label>
-                            <textarea id="message" name="message" rows="5" required aria-required="true" placeholder="Tell us more about you and what brings you to BUKI-WORX..."></textarea>
-                        </div>
+                        <div class="form-success" id="form-success"></div>
 
                         <button type="submit" class="cta-button">Send Message</button>
+
                     </form>
                 </div>
-<section class="booking-section">
-  <h2>Book a Class</h2>
-  <p>Send your request and we’ll confirm availability.</p>
 
-  <!-- Success message (empty by default) -->
-  <div id="formSuccess" class="form-success" aria-live="polite"></div>
-
-  <form id="bookingForm" novalidate>
-    <div class="field">
-      <label for="booking-name">Name</label>
-      <input id="booking-name" name="name" type="text" autocomplete="name" />
-      <div id="booking-nameError" class="field-error"></div>
-    </div>
-
-    <div class="field">
-      <label for="booking-email">Email</label>
-      <input id="booking-email" name="email" type="email" autocomplete="email" />
-      <div id="booking-emailError" class="field-error"></div>
-    </div>
-
-    <div class="field">
-      <label for="booking-phone">Phone</label>
-      <input id="booking-phone" name="phone" type="tel" autocomplete="tel" />
-      <div id="booking-phoneError" class="field-error"></div>
-    </div>
-
-    <div class="field">
-      <label for="booking-message">Message</label>
-      <textarea id="booking-message" name="message" rows="5"></textarea>
-      <div id="booking-messageError" class="field-error"></div>
-    </div>
-
-    <button id="submitBtn" type="submit">Send Request</button>
-  </form>
-</section>
                 <!-- Contact Info -->
                 <div class="contact-info-section">
                     <h2>Contact Information</h2>

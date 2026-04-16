@@ -1,148 +1,121 @@
-// Step 6: Polish & UX (disable button, styling hooks, cleaner success timeout)
+// ── Pure validation functions ─────────────────────────────────────────────────
+// Kept separate from DOM code so Jest can import and test them directly.
 
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("bookingForm");
-  if (!form) return;
+/**
+ * Returns true if the string looks like a valid email address.
+ * Pattern: <something> @ <something> . <something>
+ * Intentionally simple — catches common typos without rejecting valid addresses.
+ */
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
 
-  const successEl = document.getElementById("formSuccess");
+/**
+ * Validates all three contact form fields.
+ * @param {{ name: string, email: string, message: string }} fields
+ * @returns {{ errors: { name: string, email: string, message: string }, isValid: boolean }}
+ */
+function validateForm(fields) {
+  const errors = { name: '', email: '', message: '' };
+  let isValid = true;
 
-  // Error elements
-  const nameErrorEl = document.getElementById("booking-nameError");
-  const emailErrorEl = document.getElementById("booking-emailError");
-  const phoneErrorEl = document.getElementById("booking-phoneError");
-  const messageErrorEl = document.getElementById("booking-messageError");
-
-  // Inputs
-  const nameInput = document.getElementById("booking-name");
-  const emailInput = document.getElementById("booking-email");
-  const phoneInput = document.getElementById("booking-phone");
-  const messageInput = document.getElementById("booking-message");
-
-  // Button
-  const submitBtn = document.getElementById("submitBtn");
-
-  // Success timeout (clean pattern)
-  let successTimeout = null;
-
-  // Validation helpers
-  function validateRequired(value) {
-    return value.trim().length > 0;
+  if (!fields.name.trim()) {
+    errors.name = 'Name is required.';
+    isValid = false;
   }
 
-  function validateEmail(value) {
-    const email = value.trim();
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!fields.email.trim()) {
+    errors.email = 'Email is required.';
+    isValid = false;
+  } else if (!isValidEmail(fields.email)) {
+    errors.email = 'Please enter a valid email address.';
+    isValid = false;
   }
 
-  function validatePhone(value) {
-    const digits = value.replace(/\D/g, "");
-    return digits.length >= 10; // booking form: require 10+ digits
+  if (!fields.message.trim()) {
+    errors.message = 'Message is required.';
+    isValid = false;
   }
 
-  function setError(inputEl, errorEl, message) {
-    if (errorEl) errorEl.textContent = message;
-    if (inputEl) inputEl.classList.add("input-error");
+  return { errors, isValid };
+}
+
+// ── DOM helpers ───────────────────────────────────────────────────────────────
+
+/**
+ * Shows or clears an inline error for one field.
+ * Passing an empty string clears the error and removes the error border.
+ */
+function renderFieldError(inputEl, errorEl, message) {
+  errorEl.textContent = message;
+  if (message) {
+    inputEl.classList.add('input-error');
+  } else {
+    inputEl.classList.remove('input-error');
   }
+}
 
-  function clearError(inputEl, errorEl) {
-    if (errorEl) errorEl.textContent = "";
-    if (inputEl) inputEl.classList.remove("input-error");
-  }
+// ── DOM wiring ────────────────────────────────────────────────────────────────
 
-  function clearAllErrors() {
-    clearError(nameInput, nameErrorEl);
-    clearError(emailInput, emailErrorEl);
-    clearError(phoneInput, phoneErrorEl);
-    clearError(messageInput, messageErrorEl);
-  }
+/**
+ * Wires up the contact form.
+ * Called automatically on DOMContentLoaded in the browser.
+ * Exported and called manually in tests so each test gets a fresh binding.
+ */
+function init() {
+  const form = document.getElementById('contact-form');
+  if (!form) return; // Not on the contact page — do nothing.
 
-  function showSuccess(message) {
-    if (!successEl) return;
+  const nameInput    = document.getElementById('name');
+  const emailInput   = document.getElementById('email');
+  const messageInput = document.getElementById('message');
+  const nameError    = document.getElementById('name-error');
+  const emailError   = document.getElementById('email-error');
+  const messageError = document.getElementById('message-error');
+  const successEl    = document.getElementById('form-success');
+  const submitBtn    = form.querySelector('button[type="submit"]');
 
-    successEl.textContent = message;
-    successEl.classList.add("success-visible");
+  // Clear a field's inline error as the user starts correcting it.
+  nameInput.addEventListener('input', () => renderFieldError(nameInput, nameError, ''));
+  emailInput.addEventListener('input', () => renderFieldError(emailInput, emailError, ''));
+  messageInput.addEventListener('input', () => renderFieldError(messageInput, messageError, ''));
 
-    // Make sure user sees it
-    successEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
 
-    clearTimeout(successTimeout);
-    successTimeout = setTimeout(() => {
-      successEl.textContent = "";
-      successEl.classList.remove("success-visible");
-    }, 5500);
-  }
+    const { errors, isValid } = validateForm({
+      name:    nameInput.value,
+      email:   emailInput.value,
+      message: messageInput.value,
+    });
 
-  function setSubmitting(isSubmitting) {
-    if (!submitBtn) return;
-    submitBtn.disabled = isSubmitting;
-    submitBtn.classList.toggle("btn-disabled", isSubmitting);
-    submitBtn.textContent = isSubmitting ? "Sending..." : "Send Request";
-  }
+    // Render all error states in one pass (clears passing fields automatically).
+    renderFieldError(nameInput,    nameError,    errors.name);
+    renderFieldError(emailInput,   emailError,   errors.email);
+    renderFieldError(messageInput, messageError, errors.message);
 
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
+    if (!isValid) return;
 
-    if (successEl) {
-      successEl.textContent = "";
-      successEl.classList.remove("success-visible");
-    }
+    // Disable button while "sending".
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending\u2026';
 
-    const name = nameInput.value;
-    const email = emailInput.value;
-    const phone = phoneInput.value;
-    const message = messageInput.value;
-
-    let hasErrors = false;
-
-    // Name
-    if (!validateRequired(name)) {
-      setError(nameInput, nameErrorEl, "Name is required.");
-      hasErrors = true;
-    } else {
-      clearError(nameInput, nameErrorEl);
-    }
-
-    // Email
-    if (!validateRequired(email)) {
-      setError(emailInput, emailErrorEl, "Email is required.");
-      hasErrors = true;
-    } else if (!validateEmail(email)) {
-      setError(emailInput, emailErrorEl, "Enter a valid email address.");
-      hasErrors = true;
-    } else {
-      clearError(emailInput, emailErrorEl);
-    }
-
-    // Phone
-    if (!validateRequired(phone)) {
-      setError(phoneInput, phoneErrorEl, "Phone is required.");
-      hasErrors = true;
-    } else if (!validatePhone(phone)) {
-      setError(phoneInput, phoneErrorEl, "Enter a valid phone number (10+ digits).");
-      hasErrors = true;
-    } else {
-      clearError(phoneInput, phoneErrorEl);
-    }
-
-    // Message
-    if (!validateRequired(message)) {
-      setError(messageInput, messageErrorEl, "Message is required.");
-      hasErrors = true;
-    } else {
-      clearError(messageInput, messageErrorEl);
-    }
-
-    if (hasErrors) return;
-
-    // UX: disable during "submission"
-    setSubmitting(true);
-
-    // Simulate short processing time for UX (no backend)
-    setTimeout(() => {
-      clearAllErrors();
+    // Simulated async send — swap for fetch('/api/contact', ...) when ready.
+    setTimeout(function () {
+      successEl.textContent = 'Message sent — we\'ll be in touch shortly!';
+      successEl.classList.add('success-visible');
       form.reset();
-      showSuccess("Thanks! We’ll reach out soon to confirm your booking.");
-      setSubmitting(false);
-    }, 350);
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send Message';
+    }, 200);
   });
-});
+}
+
+// ── Export guard ──────────────────────────────────────────────────────────────
+// In the browser, `module` is not defined, so this block never runs.
+// In Node/Jest, it exports the functions for unit testing.
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { isValidEmail, validateForm, init };
+} else {
+  document.addEventListener('DOMContentLoaded', init);
+}
