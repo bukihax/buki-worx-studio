@@ -111,11 +111,299 @@ function init() {
   });
 }
 
+// ── Accessibility Widget ──────────────────────────────────────────────────────
+
+var A11Y_KEY = 'buki-a11y';
+
+// Maps each preference key to the CSS class applied to <html>.
+var A11Y_CLASS_MAP = {
+  contrast:        'a11y-contrast',
+  highlightLinks:  'a11y-highlight-links',
+  biggerText:      'a11y-bigger-text',
+  textSpacing:     'a11y-text-spacing',
+  pauseAnimations: 'a11y-pause-anim',
+  dyslexia:        'a11y-dyslexia',
+  bigCursor:       'a11y-big-cursor',
+  tooltips:        'a11y-tooltips',
+  lineHeight:      'a11y-line-height',
+  textAlign:       'a11y-text-align',
+};
+
+function a11yLoadPrefs() {
+  try { return JSON.parse(localStorage.getItem(A11Y_KEY)) || {}; }
+  catch (e) { return {}; }
+}
+
+function a11ySavePrefs(prefs) {
+  localStorage.setItem(A11Y_KEY, JSON.stringify(prefs));
+}
+
+// Reads the saved prefs object and toggles each CSS class on <html>.
+function a11yApplyPrefs(prefs) {
+  var root = document.documentElement;
+  Object.keys(A11Y_CLASS_MAP).forEach(function (key) {
+    root.classList.toggle(A11Y_CLASS_MAP[key], !!prefs[key]);
+  });
+}
+
+// Returns an SVG string for a given icon name.
+function a11yIcon(name) {
+  var icons = {
+    contrast:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+      '<rect x="2" y="3" width="20" height="15" rx="1.5"/>' +
+      '<path d="M12 3v15" />' +
+      '<rect x="2" y="3" width="10" height="15" rx="1.5" fill="currentColor" stroke="none"/>' +
+      '</svg>',
+
+    highlightLinks:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+      '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke-linecap="round"/>' +
+      '<path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke-linecap="round"/>' +
+      '<line x1="4" y1="20" x2="20" y2="20" stroke-width="2"/>' +
+      '</svg>',
+
+    biggerText:
+      '<svg viewBox="0 0 24 24" fill="currentColor">' +
+      '<text x="1" y="13" font-size="9" font-weight="900" font-family="serif">T</text>' +
+      '<text x="10" y="18" font-size="14" font-weight="900" font-family="serif">T</text>' +
+      '</svg>',
+
+    textSpacing:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+      '<path d="M3 12h18M3 8l-1 4 1 4M21 8l1 4-1 4" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '</svg>',
+
+    pauseAnimations:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+      '<circle cx="12" cy="12" r="9"/>' +
+      '<line x1="10" y1="8" x2="10" y2="16" stroke-width="2" stroke-linecap="round"/>' +
+      '<line x1="14" y1="8" x2="14" y2="16" stroke-width="2" stroke-linecap="round"/>' +
+      '</svg>',
+
+    dyslexia:
+      '<svg viewBox="0 0 24 24" fill="currentColor">' +
+      '<text x="2" y="16" font-size="12" font-weight="900" font-family="Arial,sans-serif">Df</text>' +
+      '</svg>',
+
+    bigCursor:
+      '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0.5">' +
+      '<path d="M4 2l16 10-7 1.5-4 7.5z"/>' +
+      '</svg>',
+
+    tooltips:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+      '<rect x="2" y="3" width="16" height="12" rx="2"/>' +
+      '<path d="M6 19l4-4 4 4" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<line x1="10" y1="7" x2="10" y2="7.5" stroke-width="2" stroke-linecap="round"/>' +
+      '<line x1="10" y1="9.5" x2="10" y2="13" stroke-width="1.5" stroke-linecap="round"/>' +
+      '</svg>',
+
+    lineHeight:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+      '<path d="M4 6h12M4 12h16M4 18h12" stroke-linecap="round"/>' +
+      '<path d="M20 3v18M19 4l1-1 1 1M19 20l1 1 1-1" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '</svg>',
+
+    textAlign:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+      '<path d="M4 6h16M4 11h10M4 16h16" stroke-linecap="round"/>' +
+      '</svg>',
+
+    reset:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+      '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.36 2.5L3 8" stroke-linecap="round"/>' +
+      '<path d="M3 3v5h5" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '</svg>',
+
+    hide:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+      '<path d="M5 15l7-7 7 7" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '</svg>',
+  };
+  return icons[name] || '';
+}
+
+// Builds the HTML for one toggleable tile.
+function a11yTile(key, label, isOn) {
+  return (
+    '<button class="a11y-tile' + (isOn ? ' a11y-tile--on' : '') + '" ' +
+    'data-key="' + key + '" ' +
+    'aria-pressed="' + (isOn ? 'true' : 'false') + '" ' +
+    'aria-label="' + label + (isOn ? ', on' : ', off') + '">' +
+    '<span class="a11y-tile-icon" aria-hidden="true">' + a11yIcon(key) + '</span>' +
+    '<span class="a11y-tile-label">' + label + '</span>' +
+    '</button>'
+  );
+}
+
+function initA11y() {
+  // Apply saved prefs immediately so the page renders in the correct mode.
+  var prefs = a11yLoadPrefs();
+  a11yApplyPrefs(prefs);
+
+  // ── Inject a nav item into the existing navbar ────────────────────────────
+  // Every page loads this script and has a .nav-menu <ul> — we add one <li>.
+  var navMenu = document.querySelector('.nav-menu');
+  if (!navMenu) return; // safety: no nav on this page
+
+  var navItem = document.createElement('li');
+  navItem.id = 'a11y-nav-item';
+
+  navItem.innerHTML =
+    '<button id="a11y-toggle" aria-label="Open accessibility menu" ' +
+    'aria-expanded="false" aria-controls="a11y-panel">Accessibility</button>' +
+
+    '<div id="a11y-panel" role="dialog" aria-label="Accessibility options" hidden>' +
+
+    '<div id="a11y-panel-header">' +
+    '<span>Accessibility</span>' +
+    '<button id="a11y-close" aria-label="Close accessibility menu">&times;</button>' +
+    '</div>' +
+
+    '<div id="a11y-grid" role="group" aria-label="Accessibility toggles">' +
+    a11yTile('contrast',        'Contrast +',        !!prefs.contrast) +
+    a11yTile('highlightLinks',  'Highlight Links',   !!prefs.highlightLinks) +
+    a11yTile('biggerText',      'Bigger Text',       !!prefs.biggerText) +
+    a11yTile('textSpacing',     'Text Spacing',      !!prefs.textSpacing) +
+    a11yTile('pauseAnimations', 'Pause Animations',  !!prefs.pauseAnimations) +
+    a11yTile('dyslexia',        'Dyslexia Friendly', !!prefs.dyslexia) +
+    a11yTile('bigCursor',       'Cursor',            !!prefs.bigCursor) +
+    a11yTile('tooltips',        'Tooltips',          !!prefs.tooltips) +
+    a11yTile('lineHeight',      'Line Height',       !!prefs.lineHeight) +
+    a11yTile('textAlign',       'Text Align',        !!prefs.textAlign) +
+    '<button id="a11y-reset" aria-label="Reset all accessibility settings">' +
+    '<span class="a11y-tile-icon" aria-hidden="true">' + a11yIcon('reset') + '</span>' +
+    '<span class="a11y-tile-label">Reset All</span>' +
+    '</button>' +
+    '</div>' +
+
+    '</div>';
+
+  navMenu.appendChild(navItem);
+
+  // ── Panel open/close helpers ──────────────────────────────────────────────
+  var toggleBtn = document.getElementById('a11y-toggle');
+  var panel     = document.getElementById('a11y-panel');
+  var closeBtn  = document.getElementById('a11y-close');
+
+  function openPanel() {
+    panel.hidden = false;
+    toggleBtn.setAttribute('aria-expanded', 'true');
+    closeBtn.focus();
+  }
+
+  function closePanel() {
+    panel.hidden = true;
+    toggleBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  toggleBtn.addEventListener('click', function () {
+    panel.hidden ? openPanel() : closePanel();
+  });
+  closeBtn.addEventListener('click', function () {
+    closePanel();
+    toggleBtn.focus();
+  });
+
+  // Escape closes the panel
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !panel.hidden) {
+      closePanel();
+      toggleBtn.focus();
+    }
+  });
+
+  // Click outside the nav item closes the panel
+  document.addEventListener('click', function (e) {
+    if (!panel.hidden && !navItem.contains(e.target)) closePanel();
+  });
+
+  // ── Tile toggle — one handler for all 10 tiles ───────────────────────────
+  document.getElementById('a11y-grid').addEventListener('click', function (e) {
+    var tile = e.target.closest('[data-key]');
+    if (!tile) return;
+
+    var key = tile.dataset.key;
+    var prefs = a11yLoadPrefs();
+    prefs[key] = !prefs[key];
+    a11ySavePrefs(prefs);
+    a11yApplyPrefs(prefs);
+
+    tile.classList.toggle('a11y-tile--on', !!prefs[key]);
+    tile.setAttribute('aria-pressed', prefs[key] ? 'true' : 'false');
+    tile.setAttribute('aria-label',
+      tile.querySelector('.a11y-tile-label').textContent +
+      (prefs[key] ? ', on' : ', off')
+    );
+  });
+
+  // ── Reset ─────────────────────────────────────────────────────────────────
+  document.getElementById('a11y-reset').addEventListener('click', function () {
+    a11ySavePrefs({});
+    a11yApplyPrefs({});
+    document.querySelectorAll('#a11y-grid [data-key]').forEach(function (tile) {
+      tile.classList.remove('a11y-tile--on');
+      tile.setAttribute('aria-pressed', 'false');
+      tile.setAttribute('aria-label',
+        tile.querySelector('.a11y-tile-label').textContent + ', off'
+      );
+    });
+  });
+
+  // ── Custom cursor ring ────────────────────────────────────────────────────
+  var cursorRing = document.createElement('div');
+  cursorRing.id = 'a11y-cursor';
+  cursorRing.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(cursorRing);
+
+  document.addEventListener('mousemove', function (e) {
+    if (document.documentElement.classList.contains('a11y-big-cursor')) {
+      cursorRing.style.display = 'block';
+      cursorRing.style.left = e.clientX + 'px';
+      cursorRing.style.top  = e.clientY + 'px';
+    } else {
+      cursorRing.style.display = 'none';
+    }
+  });
+
+  // ── Tooltip overlay ───────────────────────────────────────────────────────
+  var tooltipEl = document.createElement('div');
+  tooltipEl.id = 'a11y-tooltip';
+  tooltipEl.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(tooltipEl);
+
+  document.addEventListener('mouseover', function (e) {
+    if (!document.documentElement.classList.contains('a11y-tooltips')) return;
+    var label = e.target.getAttribute('aria-label') ||
+                e.target.getAttribute('title') ||
+                e.target.getAttribute('alt');
+    if (label) {
+      tooltipEl.textContent = label;
+      tooltipEl.style.display = 'block';
+    }
+  });
+
+  document.addEventListener('mousemove', function (e) {
+    if (tooltipEl.style.display === 'block') {
+      tooltipEl.style.left = (e.clientX + 14) + 'px';
+      tooltipEl.style.top  = (e.clientY + 14) + 'px';
+    }
+  });
+
+  document.addEventListener('mouseout', function () {
+    tooltipEl.style.display = 'none';
+  });
+}
+
 // ── Export guard ──────────────────────────────────────────────────────────────
 // In the browser, `module` is not defined, so this block never runs.
 // In Node/Jest, it exports the functions for unit testing.
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { isValidEmail, validateForm, init };
 } else {
-  document.addEventListener('DOMContentLoaded', init);
+  document.addEventListener('DOMContentLoaded', function () {
+    init();
+    initA11y();
+  });
 }

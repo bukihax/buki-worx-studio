@@ -1284,3 +1284,315 @@ footer {
   opacity: 0.7;
   cursor: not-allowed;
 }
+
+/* ===========================
+   ACCESSIBILITY NAV DROPDOWN
+   =========================== */
+
+/* The <li> that holds the toggle + panel */
+#a11y-nav-item {
+  position: relative;
+}
+
+/* Toggle button — styled to match the other nav links */
+#a11y-toggle {
+  background: none;
+  border: none;
+  color: #c0c0c0;
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.4s ease;
+}
+
+#a11y-toggle:hover,
+#a11y-toggle[aria-expanded="true"] {
+  color: #ff6b5b;
+}
+
+#a11y-toggle:focus-visible {
+  outline: 2px solid #ff6b5b;
+  outline-offset: 3px;
+}
+
+/* Dropdown panel */
+#a11y-panel {
+  position: absolute;
+  top: calc(100% + 1.4rem);
+  right: 0;
+  width: 300px;
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 107, 91, 0.3);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  z-index: 1001;
+}
+
+/* Panel header */
+#a11y-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #111;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid rgba(255, 107, 91, 0.2);
+}
+
+#a11y-panel-header span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#a11y-close {
+  background: none;
+  border: none;
+  color: #909090;
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0 0.2rem;
+  line-height: 1;
+  transition: color 0.2s;
+  font-family: inherit;
+}
+
+#a11y-close:hover,
+#a11y-close:focus-visible {
+  color: #ff6b5b;
+  outline: 2px solid #ff6b5b;
+  outline-offset: 2px;
+}
+
+/* Tile grid — 2 columns, 1px gap = divider lines */
+#a11y-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.07);
+  padding: 1px;
+}
+
+/* Individual tiles */
+.a11y-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 1.1rem 0.5rem;
+  background: #1a1a1a;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  font-family: inherit;
+}
+
+.a11y-tile:hover,
+.a11y-tile:focus-visible {
+  background: rgba(255, 107, 91, 0.1);
+  border-color: rgba(255, 107, 91, 0.35);
+  outline: none;
+}
+
+.a11y-tile--on {
+  border-color: #ff6b5b;
+  background: rgba(255, 107, 91, 0.14);
+}
+
+.a11y-tile-icon {
+  display: block;
+  width: 30px;
+  height: 30px;
+  color: #909090;
+}
+
+.a11y-tile--on .a11y-tile-icon {
+  color: #ff6b5b;
+}
+
+.a11y-tile-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.a11y-tile-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #909090;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.a11y-tile--on .a11y-tile-label {
+  color: #ff6b5b;
+}
+
+/* Reset All — spans both columns at the bottom of the grid */
+#a11y-reset {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.9rem 0.5rem;
+  background: #141414;
+  border: 2px solid transparent;
+  border-top: 1px solid rgba(255, 107, 91, 0.15);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+#a11y-reset:hover,
+#a11y-reset:focus-visible {
+  background: rgba(255, 107, 91, 0.1);
+  border-color: rgba(255, 107, 91, 0.35);
+  outline: none;
+}
+
+/* Custom cursor ring */
+#a11y-cursor {
+  display: none;
+  position: fixed;
+  width: 44px;
+  height: 44px;
+  border: 3px solid #ff6b5b;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+}
+
+.a11y-big-cursor * {
+  cursor: none !important;
+}
+
+/* Tooltip overlay */
+#a11y-tooltip {
+  display: none;
+  position: fixed;
+  background: #111;
+  color: #fff;
+  border: 1px solid rgba(255, 107, 91, 0.5);
+  padding: 0.4rem 0.7rem;
+  font-size: 0.78rem;
+  font-family: inherit;
+  max-width: 220px;
+  z-index: 99998;
+  pointer-events: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+/* Small-screen: panel extends left so it doesn't overflow viewport */
+@media (max-width: 500px) {
+  #a11y-panel {
+    right: auto;
+    left: 0;
+    width: calc(100vw - 4rem);
+  }
+}
+
+/* ===========================
+   A11Y MODE OVERRIDES
+   =========================== */
+
+/* — Contrast + — */
+.a11y-contrast body {
+  background-color: #000 !important;
+}
+.a11y-contrast header {
+  background: #000 !important;
+  border-bottom: 2px solid #ff6b5b !important;
+}
+.a11y-contrast p,
+.a11y-contrast li {
+  color: #fff !important;
+}
+.a11y-contrast .benefit-card,
+.a11y-contrast .class-card,
+.a11y-contrast .tip-card,
+.a11y-contrast .feature-item,
+.a11y-contrast .difference-card,
+.a11y-contrast .offer-card {
+  background: #111 !important;
+  border-color: #ff6b5b !important;
+}
+.a11y-contrast .hero-overlay {
+  background: rgba(0, 0, 0, 0.72) !important;
+}
+.a11y-contrast footer {
+  background: #000 !important;
+  border-top: 2px solid #ff6b5b !important;
+}
+.a11y-contrast .footer-section p,
+.a11y-contrast .social-links a {
+  color: #fff !important;
+}
+
+/* — Highlight Links — */
+.a11y-highlight-links a {
+  text-decoration: underline !important;
+  outline: 2px solid rgba(255, 107, 91, 0.6) !important;
+  outline-offset: 2px !important;
+  background: rgba(255, 107, 91, 0.08) !important;
+  padding: 0 3px !important;
+}
+
+/* — Bigger Text — */
+.a11y-bigger-text {
+  font-size: 120% !important;
+}
+
+/* — Text Spacing — */
+.a11y-text-spacing body {
+  letter-spacing: 0.1em !important;
+  word-spacing: 0.14em !important;
+}
+
+/* — Pause Animations — */
+.a11y-pause-anim *,
+.a11y-pause-anim *::before,
+.a11y-pause-anim *::after {
+  animation: none !important;
+  animation-play-state: paused !important;
+  transition: none !important;
+}
+.a11y-pause-anim video {
+  display: none !important;
+}
+
+/* — Dyslexia Friendly — */
+.a11y-dyslexia,
+.a11y-dyslexia body,
+.a11y-dyslexia input,
+.a11y-dyslexia textarea,
+.a11y-dyslexia button {
+  font-family: Arial, Helvetica, sans-serif !important;
+  letter-spacing: 0.06em !important;
+  line-height: 1.95 !important;
+  word-spacing: 0.1em !important;
+}
+
+/* — Line Height — */
+.a11y-line-height p,
+.a11y-line-height li,
+.a11y-line-height label {
+  line-height: 2.5 !important;
+}
+
+/* — Text Align (force left on centred elements) — */
+.a11y-text-align h1,
+.a11y-text-align h2,
+.a11y-text-align h3,
+.a11y-text-align p {
+  text-align: left !important;
+}
