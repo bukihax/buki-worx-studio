@@ -396,6 +396,229 @@ function initA11y() {
   });
 }
 
+// ── Parallax ──────────────────────────────────────────────────────────────────
+// Moves elements at different speeds as the user scrolls, creating depth.
+// Uses requestAnimationFrame (ticking pattern) for 60fps performance and
+// passive scroll listeners so the browser never waits on JS to paint a frame.
+
+function initParallax() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (document.documentElement.classList.contains('a11y-pause-anim')) return;
+
+  var heroContent = document.querySelector('.hero-content');
+
+  // ── Inner page hero backgrounds ───────────────────────────────────────────
+  // background-attachment: fixed is removed from CSS because it breaks on iOS
+  // and causes desktop jank. Instead we inject a child div for the image and
+  // drive it with translateY — works reliably on all browsers and devices.
+  var pageBgs = [];
+  document.querySelectorAll('.page-hero--image').forEach(function (section) {
+    var img = section.style.backgroundImage;
+    if (!img) return;
+
+    var bgDiv = document.createElement('div');
+    bgDiv.className = 'page-hero-bg';
+    bgDiv.style.backgroundImage = img;
+    section.style.backgroundImage = ''; // image lives on the child now
+    section.insertBefore(bgDiv, section.firstChild);
+
+    var h1 = section.querySelector('h1');
+    pageBgs.push({ section: section, bg: bgDiv, h1: h1 });
+  });
+
+  if (!heroContent && pageBgs.length === 0) return;
+
+  var ticking = false;
+
+  function update() {
+    var scrollY = window.scrollY;
+
+    // Homepage hero: text drifts upward at 35% of scroll speed.
+    if (heroContent) {
+      heroContent.style.transform = 'translateY(' + (scrollY * 0.35) + 'px)';
+    }
+
+    // Inner page heroes: bg image moves at 30% speed (lags behind content),
+    // title moves at 25% speed. Both use translateY relative to how far the
+    // section has scrolled past the viewport top.
+    pageBgs.forEach(function (item) {
+      var bounds = item.section.getBoundingClientRect();
+      if (bounds.bottom < 0 || bounds.top > window.innerHeight) return;
+
+      // Negative bounds.top means section has scrolled UP past viewport top.
+      // Multiplying by -0.3 shifts the bg DOWN at 30% of that speed —
+      // slower than the section itself, creating the parallax depth illusion.
+      item.bg.style.transform = 'translateY(' + (-bounds.top * 0.3) + 'px)';
+
+      if (item.h1) {
+        item.h1.style.transform = 'translateY(' + (-bounds.top * 0.25) + 'px)';
+      }
+    });
+
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', function () {
+    if (!ticking) {
+      requestAnimationFrame(update);
+      ticking = true;
+    }
+  }, { passive: true });
+}
+
+// ── Scroll Reveal ─────────────────────────────────────────────────────────────
+// Uses IntersectionObserver to add .scroll-visible when elements enter the
+// viewport. Cards inside grids get stagger delays based on their sibling index.
+// Bails out entirely if the browser lacks IntersectionObserver support or if
+// the user has Pause Animations enabled in the accessibility widget.
+
+function initScrollReveal() {
+  if (!('IntersectionObserver' in window)) return;
+  if (document.documentElement.classList.contains('a11y-pause-anim')) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var vh = window.innerHeight;
+
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('scroll-visible');
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: 0.1 });
+
+  // Only hide + observe an element if it STARTS below the visible viewport.
+  // Elements already on screen when the page loads are left exactly as-is —
+  // this prevents the flash where visible content goes blank then fades back.
+  function setupEl(el, dirClass) {
+    var rect = el.getBoundingClientRect();
+    if (rect.top < vh) return;        // already visible — leave it alone
+    el.classList.add('scroll-hidden');
+    if (dirClass) el.classList.add(dirClass);
+    observer.observe(el);
+  }
+
+  // Standard slide-up targets
+  var SLIDE_UP = [
+    '.benefit-card', '.class-card', '.tip-card',
+    '.feature-item', '.difference-card', '.instructor-card',
+    '.offer-card', '.info-block', '.lead-form',
+    '.benefits > h2', '.classes-section > h2',
+    '.instructors-section > h2', '.content-section h2',
+    '.section-intro',
+  ];
+  SLIDE_UP.forEach(function (sel) {
+    document.querySelectorAll(sel).forEach(function (el) { setupEl(el, null); });
+  });
+
+  // Contact page: columns slide in from opposite sides
+  document.querySelectorAll('.contact-form-section').forEach(function (el) { setupEl(el, 'from-left'); });
+  document.querySelectorAll('.contact-info-section').forEach(function (el) { setupEl(el, 'from-right'); });
+
+  // Stagger delays — only for cards that are actually being hidden
+  var GRID_CARDS = '.benefit-card, .class-card, .tip-card, ' +
+                   '.feature-item, .difference-card, .instructor-card';
+  document.querySelectorAll(GRID_CARDS).forEach(function (el) {
+    if (!el.classList.contains('scroll-hidden')) return;
+    var siblings = Array.prototype.slice.call(el.parentElement.children);
+    var idx = siblings.indexOf(el);
+    if (idx >= 1 && idx <= 5) el.classList.add('stagger-' + idx);
+  });
+}
+
+// ── Lead Generation Form ──────────────────────────────────────────────────────
+// Only present on index.html. Validates name + email, saves a claim flag to
+// localStorage so the promo code persists on return visits, then reveals the
+// code and hides the form.
+
+var LEAD_KEY = 'buki-lead-claimed';
+
+function initLeadGen() {
+  var form = document.getElementById('lead-form');
+  if (!form) return; // not on the homepage — do nothing
+
+  var claimedEl   = document.getElementById('lead-claimed');
+  var nameInput   = document.getElementById('lead-name');
+  var emailInput  = document.getElementById('lead-email');
+  var nameError   = document.getElementById('lead-name-error');
+  var emailError  = document.getElementById('lead-email-error');
+  var submitBtn   = form.querySelector('button[type="submit"]');
+
+  // If this browser has already claimed, skip straight to the code.
+  if (localStorage.getItem(LEAD_KEY)) {
+    form.hidden = true;
+    claimedEl.hidden = false;
+    return;
+  }
+
+  // Clear inline errors as the user corrects each field.
+  nameInput.addEventListener('input', function () {
+    renderFieldError(nameInput, nameError, '');
+  });
+  emailInput.addEventListener('input', function () {
+    renderFieldError(emailInput, emailError, '');
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var nameVal  = nameInput.value;
+    var emailVal = emailInput.value;
+    var valid    = true;
+
+    // Validate name
+    if (!nameVal.trim()) {
+      renderFieldError(nameInput, nameError, 'Name is required.');
+      valid = false;
+    } else {
+      renderFieldError(nameInput, nameError, '');
+    }
+
+    // Validate email
+    if (!emailVal.trim()) {
+      renderFieldError(emailInput, emailError, 'Email is required.');
+      valid = false;
+    } else if (!isValidEmail(emailVal)) {
+      renderFieldError(emailInput, emailError, 'Please enter a valid email address.');
+      valid = false;
+    } else {
+      renderFieldError(emailInput, emailError, '');
+    }
+
+    if (!valid) return;
+
+    // Mark claimed and reveal the promo code.
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Claiming\u2026';
+
+    setTimeout(function () {
+      localStorage.setItem(LEAD_KEY, '1');
+      form.hidden = true;
+      claimedEl.hidden = false;
+    }, 300);
+  });
+}
+
+// ── Editorial Nav ─────────────────────────────────────────────────────────────
+// On the homepage the header starts transparent so it floats over the full-bleed
+// hero video. Once the hero scrolls out of view the header fades to its solid
+// state. IntersectionObserver drives the toggle so there is no scroll-event math.
+
+function initEditorialNav() {
+  var header = document.querySelector('header');
+  var hero   = document.querySelector('.hero');
+  if (!header || !hero) return; // only runs on pages that have a .hero section
+
+  // Apply immediately so the first paint is transparent.
+  header.classList.add('nav-hero');
+
+  new IntersectionObserver(function (entries) {
+    // isIntersecting = hero is still visible → keep transparent
+    // not intersecting = hero has scrolled away → show solid header
+    header.classList.toggle('nav-hero', entries[0].isIntersecting);
+  }, { threshold: 0.12 }).observe(hero);
+}
+
 // ── Export guard ──────────────────────────────────────────────────────────────
 // In the browser, `module` is not defined, so this block never runs.
 // In Node/Jest, it exports the functions for unit testing.
@@ -405,5 +628,9 @@ if (typeof module !== 'undefined' && module.exports) {
   document.addEventListener('DOMContentLoaded', function () {
     init();
     initA11y();
+    initLeadGen();
+    initParallax();
+    initScrollReveal();
+    initEditorialNav();
   });
 }

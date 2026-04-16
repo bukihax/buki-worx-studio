@@ -36,13 +36,37 @@
         </section>
 
 
-        <!-- New Client Special -->
+        <!-- Lead Generation — Free Class Offer -->
         <section class="special-offer">
             <div class="offer-card">
                 <h2>New Client Special</h2>
-                <p class="offer-highlight">First Class Free</p>
-                <p>No membership required. Experience BUKI-WORX with a complimentary introductory class. Our instructors will guide you through proper form and safety so you feel confident every step of the way.</p>
-                <a href="contact.html" class="cta-button-secondary">Claim Your Free Class</a>
+                <p class="offer-highlight">Your First Class, Free</p>
+                <p>Pole, heels, silks, or strength — pick any class and your first session is completely on us. Enter your name and email to unlock your free class code.</p>
+
+                <!-- Form state (default) -->
+                <form id="lead-form" class="lead-form" novalidate>
+                    <div class="lead-form-row">
+                        <div class="lead-field">
+                            <label for="lead-name">First Name</label>
+                            <input type="text" id="lead-name" name="lead-name" placeholder="Your name" />
+                            <span class="field-error" id="lead-name-error"></span>
+                        </div>
+                        <div class="lead-field">
+                            <label for="lead-email">Email Address</label>
+                            <input type="email" id="lead-email" name="lead-email" placeholder="you@example.com" />
+                            <span class="field-error" id="lead-email-error"></span>
+                        </div>
+                    </div>
+                    <button type="submit" class="cta-button-secondary">Claim My Free Class</button>
+                </form>
+
+                <!-- Claimed state (shown after submit) -->
+                <div id="lead-claimed" class="lead-claimed" hidden>
+                    <p class="lead-claimed-intro">You're in! Show this code at the studio:</p>
+                    <div class="promo-code" aria-label="Promo code: BUKIFREE">BUKIFREE</div>
+                    <p class="promo-note">Valid for any class style &mdash; no membership required. Expires 30 days from today.</p>
+                    <a href="classes.html" class="cta-button-secondary">Browse Classes</a>
+                </div>
             </div>
         </section>
 
