@@ -614,40 +614,68 @@ function initCurtain() {
 
   if (!video) return;
 
-  // Scroll distance over which the full video plays (1x viewport height).
-  var SCROLL_RANGE = window.innerHeight;
-  var ticking = false;
+  // Virtual scroll bucket — user must "scroll" this many px to fully open.
+  var TOTAL   = 600;
+  var accumulated = 0;
+  var progress    = 0;
+  var done        = false;
+  var ticking     = false;
+
+  // Lock the page at the top while curtain is active.
+  document.body.style.overflow = 'hidden';
+  window.scrollTo(0, 0);
 
   function update() {
-    var progress = Math.min(window.scrollY / SCROLL_RANGE, 1); // 0 → 1
+    progress = accumulated / TOTAL;
 
-    // Scrub video to the matching timestamp — this is the twinbru technique.
-    // Only seek if the video has loaded enough to have a duration.
     if (video.readyState >= 1 && video.duration) {
       video.currentTime = progress * video.duration;
     }
 
-    // Fade logo and hint out as scrolling starts.
     var fadeOut = Math.max(0, 1 - progress * 3);
     if (logo) logo.style.opacity = String(fadeOut);
     if (hint) hint.style.opacity = String(fadeOut);
 
-    // Hide curtain entirely once video has played through.
-    curtain.style.visibility = progress >= 1 ? 'hidden' : 'visible';
+    if (progress >= 1 && !done) {
+      done = true;
+      curtain.style.visibility = 'hidden';
+      // Release scroll — page is still at top so hero is the first thing seen.
+      document.body.style.overflow = '';
+    }
 
     ticking = false;
   }
 
-  // Load the first frame immediately so the video shows on page load.
+  // Wheel — normalise across mouse wheel (deltaMode 0 = px, 1 = lines, 2 = pages).
+  window.addEventListener('wheel', function (e) {
+    if (done) return;
+    e.preventDefault();
+    var delta = e.deltaMode === 1 ? e.deltaY * 40
+              : e.deltaMode === 2 ? e.deltaY * 800
+              : e.deltaY;
+    accumulated = Math.min(TOTAL, Math.max(0, accumulated + delta));
+    if (!ticking) { requestAnimationFrame(update); ticking = true; }
+  }, { passive: false });
+
+  // Touch — drag up to open.
+  var lastTouchY = 0;
+  window.addEventListener('touchstart', function (e) {
+    lastTouchY = e.touches[0].clientY;
+  }, { passive: true });
+
+  window.addEventListener('touchmove', function (e) {
+    if (done) return;
+    e.preventDefault();
+    var dy = lastTouchY - e.touches[0].clientY; // positive = dragging up
+    lastTouchY = e.touches[0].clientY;
+    accumulated = Math.min(TOTAL, Math.max(0, accumulated + dy * 2));
+    if (!ticking) { requestAnimationFrame(update); ticking = true; }
+  }, { passive: false });
+
+  // Show frame 0 the moment metadata is available.
   video.addEventListener('loadedmetadata', function () {
     video.currentTime = 0;
   });
-
-  window.addEventListener('scroll', function () {
-    if (!ticking) { requestAnimationFrame(update); ticking = true; }
-  }, { passive: true });
-
-  update();
 }
 
 // ── Studio AI Chat ────────────────────────────────────────────────────────────
