@@ -608,28 +608,91 @@ function initCurtain() {
   var curtain = document.getElementById('curtain');
   if (!curtain) return;
 
-  var video = document.getElementById('curtain-video');
-  var hint  = curtain.querySelector('.curtain-hint');
-  var logo  = curtain.querySelector('.curtain-logo');
+  var video  = document.getElementById('curtain-video');
+  var canvas = document.getElementById('curtain-canvas');
+  var hint   = curtain.querySelector('.curtain-hint');
+  var logo   = curtain.querySelector('.curtain-logo');
 
-  if (!video) return;
+  if (!video || !canvas) return;
 
-  // Virtual scroll bucket — user must "scroll" this many px to fully open.
-  var TOTAL   = 600;
+  var ctx = canvas.getContext('2d');
+
+  // Virtual scroll bucket — how many px of wheel input opens the curtain fully.
+  var TOTAL       = 700;
   var accumulated = 0;
-  var progress    = 0;
   var done        = false;
   var ticking     = false;
 
-  // Lock the page at the top while curtain is active.
+  // Seek queue — never stack more than one pending seek.
+  // When the browser finishes a seek it fires 'seeked'; only then do we
+  // issue the next one. This prevents frame-skipping from rapid scroll.
+  var seeking     = false;
+  var pendingTime = -1;
+
+  // Lock page at top while curtain is active.
   document.body.style.overflow = 'hidden';
   window.scrollTo(0, 0);
 
-  function update() {
-    progress = accumulated / TOTAL;
+  // ── Canvas helpers ─────────────────────────────────────────────────────────
 
-    if (video.readyState >= 1 && video.duration) {
-      video.currentTime = progress * video.duration;
+  function resizeCanvas() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas, { passive: true });
+
+  // Draw current video frame to canvas maintaining object-fit:cover behaviour.
+  function drawFrame() {
+    var vw = video.videoWidth  || canvas.width;
+    var vh = video.videoHeight || canvas.height;
+    var scale  = Math.max(canvas.width / vw, canvas.height / vh);
+    var drawW  = vw * scale;
+    var drawH  = vh * scale;
+    var x = (canvas.width  - drawW) / 2;
+    var y = (canvas.height - drawH) / 2;
+    ctx.drawImage(video, x, y, drawW, drawH);
+  }
+
+  // ── Smart seek queue ───────────────────────────────────────────────────────
+
+  function seekTo(time) {
+    if (seeking) {
+      pendingTime = time; // remember latest target, discard anything older
+      return;
+    }
+    seeking = true;
+    video.currentTime = time;
+  }
+
+  // Each time a seek completes, draw that frame then process any queued target.
+  video.addEventListener('seeked', function () {
+    drawFrame();
+    seeking = false;
+    if (pendingTime >= 0) {
+      var t   = pendingTime;
+      pendingTime = -1;
+      seekTo(t);
+    }
+  });
+
+  // Paint frame 0 as soon as the video is ready to show.
+  video.addEventListener('loadeddata', function () {
+    resizeCanvas();
+    seekTo(0);
+  });
+
+  video.addEventListener('loadedmetadata', function () {
+    seekTo(0);
+  });
+
+  // ── Scroll / input handling ────────────────────────────────────────────────
+
+  function update() {
+    var progress = accumulated / TOTAL;
+
+    if (video.readyState >= 2 && video.duration) {
+      seekTo(Math.min(progress, 1) * video.duration);
     }
 
     var fadeOut = Math.max(0, 1 - progress * 3);
@@ -639,14 +702,13 @@ function initCurtain() {
     if (progress >= 1 && !done) {
       done = true;
       curtain.style.visibility = 'hidden';
-      // Release scroll — page is still at top so hero is the first thing seen.
-      document.body.style.overflow = '';
+      document.body.style.overflow = ''; // unlock — page still at top
     }
 
     ticking = false;
   }
 
-  // Wheel — normalise across mouse wheel (deltaMode 0 = px, 1 = lines, 2 = pages).
+  // Mouse wheel — normalise deltaMode differences across browsers.
   window.addEventListener('wheel', function (e) {
     if (done) return;
     e.preventDefault();
@@ -657,7 +719,7 @@ function initCurtain() {
     if (!ticking) { requestAnimationFrame(update); ticking = true; }
   }, { passive: false });
 
-  // Touch — drag up to open.
+  // Touch — swipe up to open.
   var lastTouchY = 0;
   window.addEventListener('touchstart', function (e) {
     lastTouchY = e.touches[0].clientY;
@@ -666,16 +728,11 @@ function initCurtain() {
   window.addEventListener('touchmove', function (e) {
     if (done) return;
     e.preventDefault();
-    var dy = lastTouchY - e.touches[0].clientY; // positive = dragging up
+    var dy = lastTouchY - e.touches[0].clientY;
     lastTouchY = e.touches[0].clientY;
-    accumulated = Math.min(TOTAL, Math.max(0, accumulated + dy * 2));
+    accumulated = Math.min(TOTAL, Math.max(0, accumulated + dy * 2.5));
     if (!ticking) { requestAnimationFrame(update); ticking = true; }
   }, { passive: false });
-
-  // Show frame 0 the moment metadata is available.
-  video.addEventListener('loadedmetadata', function () {
-    video.currentTime = 0;
-  });
 }
 
 // ── Studio AI Chat ────────────────────────────────────────────────────────────

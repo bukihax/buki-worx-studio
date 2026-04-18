@@ -1,4 +1,17 @@
 /* ===========================
+   CUSTOM FONTS
+   =========================== */
+
+@font-face {
+  font-family: 'Nirakolu';
+  src: url('nirakolu/Nirakolu.otf') format('opentype'),
+       url('nirakolu/Nirakolu.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ===========================
    RESET & BASE STYLES
    =========================== */
 
@@ -1745,24 +1758,21 @@ footer {
   gap: 0.75rem;
 }
 
-/* Toggle button */
+/* Toggle button — icon-only pill */
 .chat-toggle {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
   background: #ff6b5b;
   color: #fff;
   border: none;
-  border-radius: 0;
-  padding: 0.75rem 1.25rem;
-  font-family: inherit;
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  border-radius: 50%;
+  padding: 0;
   cursor: pointer;
   transition: background 0.3s ease, transform 0.2s ease;
-  box-shadow: 0 4px 20px rgba(255, 107, 91, 0.4);
+  box-shadow: 0 4px 16px rgba(255, 107, 91, 0.45);
 }
 
 .chat-toggle:hover {
@@ -1771,9 +1781,14 @@ footer {
 }
 
 .chat-toggle svg {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
+}
+
+/* Hide the text label — icon only */
+.chat-toggle-label {
+  display: none;
 }
 
 /* Panel */
@@ -1980,12 +1995,15 @@ footer {
 }
 
 .curtain-video {
+  display: none; /* seek source only — never shown directly */
+}
+
+.curtain-canvas {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
   pointer-events: none;
 }
 
@@ -1995,29 +2013,57 @@ footer {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: #fff;
+  text-align: center;
+  will-change: opacity;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2em;
+  padding: 0 1rem;
+  width: 100%;
+}
+
+/* 3D bubbly headline — creamy white with stacked depth shadows */
+.curtain-headline {
+  display: block;
+  font-family: 'Nirakolu', 'Jost', sans-serif;
+  font-size: clamp(3.5rem, 10vw, 9rem);
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  line-height: 1;
+  color: #fef9f0;
+  -webkit-text-stroke: 1.5px rgba(210, 180, 150, 0.6);
+
+  /* Gloss at top, cream-to-tan depth stack, warm ambient drop */
+  text-shadow:
+    0 -3px 6px rgba(255, 255, 245, 0.9),
+    0  1px 0 #f5e6cc,
+    0  2px 0 #ead5b0,
+    0  3px 0 #d9c09a,
+    0  4px 0 #c9aa83,
+    0  5px 0 #b8956e,
+    0  6px 0 #a8815c,
+    0  7px 3px rgba(140, 100, 60, 0.5),
+    0 12px 16px rgba(100, 70, 30, 0.3),
+    0 22px 32px rgba(60, 40, 10, 0.2);
+}
+
+.curtain-sub {
+  display: block;
   font-family: 'Jost', sans-serif;
-  font-size: clamp(3rem, 8vw, 7rem);
+  font-size: clamp(1.1rem, 3vw, 2rem);
   font-weight: 600;
   letter-spacing: 8px;
   text-transform: uppercase;
-  text-align: center;
-  text-shadow: 0 4px 40px rgba(0,0,0,0.22);
-  white-space: nowrap;
-  will-change: opacity;
-}
-
-.curtain-logo span {
-  display: block;
-  font-size: clamp(0.8rem, 1.8vw, 1.2rem);
-  font-weight: 300;
-  letter-spacing: 10px;
-  margin-top: 1rem;
-  opacity: 0.9;
+  color: rgba(255,255,255,0.95);
+  margin-top: 1.25rem;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.45);
 }
 
 /* Scroll hint */
 .curtain-hint {
+  display: none;
   position: absolute;
   bottom: 2.5rem;
   left: 50%;
@@ -2279,7 +2325,7 @@ body.landing label {
 /* Chat widget on landing */
 body.landing .chat-toggle {
   background: #c4736a;
-  box-shadow: 0 4px 20px rgba(196, 115, 106, 0.4);
+  box-shadow: 0 4px 16px rgba(196, 115, 106, 0.45);
 }
 
 body.landing .chat-toggle:hover {

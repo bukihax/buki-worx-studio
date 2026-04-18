@@ -12,10 +12,14 @@
 <body class="landing">
     <!-- Curtain — scroll scrubs the video frame by frame -->
     <div id="curtain" aria-hidden="true">
+        <!-- Video is hidden — used only as a seek source for the canvas below -->
         <video id="curtain-video" class="curtain-video" muted playsinline preload="auto" src="images/silkcurtains_vid_2.mp4"></video>
+        <!-- Canvas receives each decoded frame, giving smooth pixel-perfect scrubbing -->
+        <canvas id="curtain-canvas" class="curtain-canvas"></canvas>
         <div class="curtain-logo">
-            BUKI&#8209;WORX
-            <span>Pole Fitness &amp; Empowerment</span>
+            <span class="curtain-headline">Empower Yourself</span>
+            <span class="curtain-headline">Through Movement</span>
+            <span class="curtain-sub">BUKI&#8209;WORX STUDIO</span>
         </div>
         <div class="curtain-hint">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
@@ -45,7 +49,6 @@
             </video>
             <div class="hero-overlay"></div>
             <div class="hero-content">
-                <h1>Empower Yourself Through Movement</h1>
                 <p>Pole fitness, heels, silks, and strength training designed to build confidence, strength, and community for women.</p>
                 <a href="contact.html" class="cta-button">Book Your First Class</a>
             </div>
@@ -135,7 +138,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
-            Ask the Studio
+            <span class="chat-toggle-label">Ask the Studio</span>
         </button>
         <div id="chat-panel" class="chat-panel" hidden>
             <div class="chat-header">
