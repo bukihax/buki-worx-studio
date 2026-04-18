@@ -1979,24 +1979,14 @@ footer {
   pointer-events: none;
 }
 
-.curtain-panel {
+.curtain-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100%;
-  width: 50%;
-  will-change: transform;
-}
-
-.curtain-left {
-  background-image: url('images/silkcurtains.png');
-  background-size: 200% 100%;
-  background-position: left center;
-  background-repeat: no-repeat;
-}
-
-.curtain-right {
-  background-image: url('images/silkcurtains.png');
-  background-size: 200% 100%;
-  background-position: right center;
-  background-repeat: no-repeat;
+  object-fit: cover;
+  pointer-events: none;
 }
 
 /* Centered branding shown on the closed curtain */

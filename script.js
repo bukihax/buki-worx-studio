@@ -608,33 +608,40 @@ function initCurtain() {
   var curtain = document.getElementById('curtain');
   if (!curtain) return;
 
-  var leftPanel  = curtain.querySelector('.curtain-left');
-  var rightPanel = curtain.querySelector('.curtain-right');
-  var hint       = curtain.querySelector('.curtain-hint');
-  var logo       = curtain.querySelector('.curtain-logo');
+  var video = document.getElementById('curtain-video');
+  var hint  = curtain.querySelector('.curtain-hint');
+  var logo  = curtain.querySelector('.curtain-logo');
 
-  var OPEN_AT = window.innerHeight * 0.8;
-  var ticking  = false;
+  if (!video) return;
+
+  // Scroll distance over which the full video plays (1x viewport height).
+  var SCROLL_RANGE = window.innerHeight;
+  var ticking = false;
 
   function update() {
-    var progress = Math.min(window.scrollY / OPEN_AT, 1);
+    var progress = Math.min(window.scrollY / SCROLL_RANGE, 1); // 0 → 1
 
-    var eased = progress < 0.5
-      ? 2 * progress * progress
-      : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+    // Scrub video to the matching timestamp — this is the twinbru technique.
+    // Only seek if the video has loaded enough to have a duration.
+    if (video.readyState >= 1 && video.duration) {
+      video.currentTime = progress * video.duration;
+    }
 
-    var pct = eased * 100;
-    leftPanel.style.transform  = 'translateX(-' + pct + '%)';
-    rightPanel.style.transform = 'translateX('  + pct + '%)';
-
-    var fadeOut = Math.max(0, 1 - progress * 4);
-    if (hint) hint.style.opacity = String(fadeOut);
+    // Fade logo and hint out as scrolling starts.
+    var fadeOut = Math.max(0, 1 - progress * 3);
     if (logo) logo.style.opacity = String(fadeOut);
+    if (hint) hint.style.opacity = String(fadeOut);
 
+    // Hide curtain entirely once video has played through.
     curtain.style.visibility = progress >= 1 ? 'hidden' : 'visible';
 
     ticking = false;
   }
+
+  // Load the first frame immediately so the video shows on page load.
+  video.addEventListener('loadedmetadata', function () {
+    video.currentTime = 0;
+  });
 
   window.addEventListener('scroll', function () {
     if (!ticking) { requestAnimationFrame(update); ticking = true; }
