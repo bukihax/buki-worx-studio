@@ -599,6 +599,179 @@ function initLeadGen() {
   });
 }
 
+// ── Studio AI Chat ────────────────────────────────────────────────────────────
+// Floating chat widget that calls a locally running Ollama model (llama3.2).
+// Responses are streamed token-by-token via the Ollama /api/chat streaming
+// endpoint so text appears progressively. A session-level Map caches answers
+// so the same question never makes a second API call.
+
+function initStudioChat() {
+  var OLLAMA_URL = 'http://localhost:11434/api/chat';
+  var MODEL      = 'llama3.2';
+
+  var toggle      = document.getElementById('chat-toggle');
+  var panel       = document.getElementById('chat-panel');
+  var closeBtn    = document.querySelector('.chat-close');
+  var messagesEl  = document.getElementById('chat-messages');
+  var form        = document.getElementById('chat-form');
+  var input       = document.getElementById('chat-input');
+  var suggestions = document.querySelectorAll('.chat-suggestion');
+
+  if (!toggle) return; // widget HTML not present on this page
+
+  // Session cache — key: lowercased question, value: full response string
+  var responseCache = {};
+
+  var SYSTEM_PROMPT =
+    'You are the friendly studio assistant for BUKI-WORX STUDIO, a pole fitness ' +
+    'and empowerment studio for women in Orlando, FL (512 Innovation Drive, Orlando FL 32801). ' +
+    'Phone: (407) 555-2849. Email: hello@bukiworx.com. ' +
+    'Classes offered: Pole Fitness (beginner through advanced), Heels Choreography, ' +
+    'Aerial Silks, and Strength Training. All classes welcome all experience levels ' +
+    'and body types in a judgment-free zone. ' +
+    'New clients get their first class free — promo code BUKIFREE, valid 30 days, no membership required. ' +
+    'Private parties are available for bachelorette parties, birthdays, and corporate events. ' +
+    'Bookings are made through the Contact page or by calling the studio. ' +
+    'Tone: warm, encouraging, empowering. Keep answers to 2–4 sentences. ' +
+    'If you do not know specific pricing or schedule details, direct them to contact the studio.';
+
+  // ── Open / close ────────────────────────────────────────────────────────────
+
+  toggle.addEventListener('click', function () {
+    var isOpen = !panel.hidden;
+    panel.hidden = isOpen;
+    toggle.setAttribute('aria-expanded', String(!isOpen));
+
+    // Show a greeting on first open
+    if (!isOpen && messagesEl.children.length === 0) {
+      addMessage('assistant',
+        "Hi! I'm the BUKI-WORX assistant. Ask me about classes, booking, parties, " +
+        "or anything else about the studio!"
+      );
+    }
+    if (!isOpen) {
+      setTimeout(function () { input.focus(); }, 60);
+    }
+  });
+
+  closeBtn.addEventListener('click', function () {
+    panel.hidden = true;
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.focus();
+  });
+
+  // ── Quick suggestion chips ──────────────────────────────────────────────────
+
+  suggestions.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (panel.hidden) {
+        panel.hidden = false;
+        toggle.setAttribute('aria-expanded', 'true');
+        if (messagesEl.children.length === 0) {
+          addMessage('assistant',
+            "Hi! I'm the BUKI-WORX assistant. Ask me about classes, booking, parties, " +
+            "or anything else about the studio!"
+          );
+        }
+      }
+      askQuestion(btn.getAttribute('data-q'));
+    });
+  });
+
+  // ── Form submit ─────────────────────────────────────────────────────────────
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var q = input.value.trim();
+    if (!q) return;
+    input.value = '';
+    askQuestion(q);
+  });
+
+  // ── Core: send a question, stream the answer ────────────────────────────────
+
+  function addMessage(role, text) {
+    var div = document.createElement('div');
+    div.className = 'chat-message chat-message--' + role;
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return div;
+  }
+
+  function askQuestion(question) {
+    addMessage('user', question);
+
+    var cacheKey = question.toLowerCase().trim();
+
+    // Return cached answer immediately — no API call needed
+    if (responseCache[cacheKey]) {
+      addMessage('assistant', responseCache[cacheKey]);
+      return;
+    }
+
+    // Placeholder bubble that fills in as tokens stream in
+    var bubble = addMessage('assistant', '');
+    bubble.classList.add('chat-message--streaming');
+    var accumulated = '';
+
+    fetch(OLLAMA_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: MODEL,
+        stream: true,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user',   content: question      }
+        ]
+      })
+    })
+    .then(function (res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+
+      var reader  = res.body.getReader();
+      var decoder = new TextDecoder();
+
+      // Recursively read chunks until the stream is done.
+      // Each chunk is one or more newline-delimited JSON objects from Ollama.
+      function readNext() {
+        return reader.read().then(function (result) {
+          if (result.done) {
+            bubble.classList.remove('chat-message--streaming');
+            responseCache[cacheKey] = accumulated; // cache completed response
+            return;
+          }
+
+          var lines = decoder.decode(result.value, { stream: true }).split('\n');
+          lines.forEach(function (line) {
+            if (!line.trim()) return;
+            try {
+              var obj = JSON.parse(line);
+              if (obj.message && obj.message.content) {
+                accumulated += obj.message.content;
+                bubble.textContent = accumulated;
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+              }
+            } catch (_) { /* partial JSON — ignore */ }
+          });
+
+          return readNext();
+        });
+      }
+
+      return readNext();
+    })
+    .catch(function () {
+      bubble.classList.remove('chat-message--streaming');
+      bubble.textContent =
+        "I'm having trouble connecting to the local AI right now. " +
+        "Please call us at (407) 555-2849 or email hello@bukiworx.com and we'll be happy to help!";
+      bubble.classList.add('chat-message--error');
+    });
+  }
+}
+
 // ── Editorial Nav ─────────────────────────────────────────────────────────────
 // On the homepage the header starts transparent so it floats over the full-bleed
 // hero video. Once the hero scrolls out of view the header fades to its solid
@@ -632,5 +805,6 @@ if (typeof module !== 'undefined' && module.exports) {
     initParallax();
     initScrollReveal();
     initEditorialNav();
+    initStudioChat();
   });
 }

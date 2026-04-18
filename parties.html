@@ -114,5 +114,32 @@
             <p>&copy; 2025 BUKI-WORX STUDIO. All rights reserved.</p>
         </div>
     </footer>
+    <!-- Studio AI Chat Widget -->
+    <div id="chat-widget" class="chat-widget">
+        <button id="chat-toggle" class="chat-toggle" aria-expanded="false" aria-controls="chat-panel" aria-label="Open studio assistant">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            Ask the Studio
+        </button>
+        <div id="chat-panel" class="chat-panel" hidden>
+            <div class="chat-header">
+                <span>BUKI-WORX Assistant</span>
+                <button class="chat-close" aria-label="Close chat">&times;</button>
+            </div>
+            <div id="chat-messages" class="chat-messages" role="log" aria-live="polite" aria-label="Chat messages"></div>
+            <div class="chat-suggestions">
+                <button class="chat-suggestion" data-q="What classes do you offer?">Classes</button>
+                <button class="chat-suggestion" data-q="How do I book my first class?">Booking</button>
+                <button class="chat-suggestion" data-q="Do you host private parties?">Parties</button>
+            </div>
+            <form id="chat-form" class="chat-form" novalidate>
+                <input type="text" id="chat-input" name="chat-input" placeholder="Ask anything about the studio&hellip;" autocomplete="off" />
+                <button type="submit" class="chat-send" aria-label="Send message">Send</button>
+            </form>
+            <p class="chat-powered-by">Powered by Ollama &middot; llama3.2</p>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>

@@ -24,6 +24,27 @@ BUKI-WORX STUDIO offers pole fitness, heels choreography, aerial silks, and stre
 
 5. **Hero video background** — Full-screen looping video on the homepage with a controlled playback window (seconds 3–20) and a dark overlay for text legibility.
 
+6. **AI Studio Assistant (LLM-powered chatbot)** — A floating chat widget on every page that answers visitor questions about classes, booking, and parties. Calls a locally running [Ollama](https://ollama.com) instance (`llama3.2` model) via its REST API. Responses stream token-by-token using the `ReadableStream` / `fetch` API so text appears progressively. A session-level cache (plain JS object) stores completed answers so repeated questions skip the API call entirely. Falls back to a contact message if Ollama is unreachable.
+
+---
+
+## AI Studio Assistant — Setup
+
+The chat widget requires [Ollama](https://ollama.com) running locally. It makes no external network requests and costs nothing.
+
+```bash
+# 1. Install Ollama (Mac/Linux/Windows) — https://ollama.com/download
+# 2. Pull the model (one-time download, ~2 GB)
+ollama pull llama3.2
+
+# 3. Start the Ollama server (stays running in background)
+ollama serve
+
+# 4. Open the site — the "Ask the Studio" button in the bottom-right corner will work
+```
+
+The widget sends requests to `http://localhost:11434/api/chat` with `"stream": true`. Each streamed chunk is a newline-delimited JSON object; the widget parses `chunk.message.content` and appends it to the bubble in real time.
+
 ---
 
 ## Tech Stack
@@ -33,6 +54,7 @@ BUKI-WORX STUDIO offers pole fitness, heels choreography, aerial silks, and stre
 | Markup | HTML5 (semantic elements, ARIA attributes) |
 | Styling | CSS3 (custom properties, Grid, Flexbox, media queries) |
 | Interactivity | Vanilla JavaScript (ES5-compatible) |
+| LLM / AI | Ollama (local) · llama3.2 model · streamed via Fetch API |
 | Testing | Jest 29 + jest-environment-jsdom |
 | Deployment | GitHub Pages (root of `main` branch) |
 
@@ -49,7 +71,7 @@ buki-worx-studio/
 ├── contact.html        # Contact form + studio info
 ├── signup.html         # Sign-up page
 ├── styles.css          # All styles (shared across pages)
-├── script.js           # Validation logic + accessibility widget
+├── script.js           # Validation, accessibility widget, chat, parallax, scroll reveal
 ├── __tests__/
 │   └── contactForm.test.js
 ├── images/             # Video and image assets
