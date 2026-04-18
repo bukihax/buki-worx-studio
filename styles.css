@@ -1987,15 +1987,17 @@ footer {
 }
 
 .curtain-left {
-  background:
-    linear-gradient(170deg, rgba(255,255,255,0.18) 0%, transparent 45%),
-    linear-gradient(to right, #bf7d76, #ddb0a8, #f2d4ce, #e6c0b8, #d4a8a0);
+  background-image: url('images/silkcurtains.png');
+  background-size: 200% 100%;
+  background-position: left center;
+  background-repeat: no-repeat;
 }
 
 .curtain-right {
-  background:
-    linear-gradient(10deg, rgba(255,255,255,0.18) 0%, transparent 45%),
-    linear-gradient(to left, #3d6e79, #5e92a0, #85b8c4, #78adb8, #5e96a2);
+  background-image: url('images/silkcurtains.png');
+  background-size: 200% 100%;
+  background-position: right center;
+  background-repeat: no-repeat;
 }
 
 /* Centered branding shown on the closed curtain */
