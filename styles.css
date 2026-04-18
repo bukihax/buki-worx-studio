@@ -2343,3 +2343,157 @@ body.landing .chat-powered-by {
 body.landing .field-error {
   color: #a85f57;
 }
+
+/* ===========================
+   INNER PAGES — LIGHT THEME
+   (about, classes, parties, contact)
+   =========================== */
+
+/* Page hero banners */
+body.landing .page-hero {
+  background: linear-gradient(135deg, #f5ece9 0%, #ede3e0 100%);
+  border-bottom-color: rgba(196, 115, 106, 0.15);
+}
+
+body.landing .page-hero::before {
+  background: radial-gradient(circle, rgba(196, 115, 106, 0.1) 0%, transparent 70%);
+}
+
+body.landing .page-hero h1 {
+  color: #2a1818;
+}
+
+/* Content sections */
+body.landing .content-section {
+  background: #faf6f4;
+}
+
+body.landing .content-section h2,
+body.landing .content-section h3 {
+  color: #2a1818;
+}
+
+body.landing .content-section p {
+  color: #7a5550;
+}
+
+/* Class cards */
+body.landing .class-card {
+  background: #fff;
+  border-color: rgba(196, 115, 106, 0.2);
+  box-shadow: 0 2px 16px rgba(196, 115, 106, 0.06);
+}
+
+body.landing .class-card:hover {
+  background: #fff8f7;
+  box-shadow: 0 8px 32px rgba(196, 115, 106, 0.14);
+}
+
+body.landing .class-card h3 {
+  color: #2a1818;
+}
+
+body.landing .class-card p {
+  color: #7a5550;
+}
+
+body.landing .difficulty-badge {
+  background: rgba(196, 115, 106, 0.12);
+  color: #c4736a;
+}
+
+/* Classes section background */
+body.landing .classes-section {
+  background: #faf6f4;
+}
+
+body.landing .classes-section h2 {
+  color: #2a1818;
+}
+
+/* Instructors */
+body.landing .instructors-section {
+  background: #f5ece9;
+}
+
+body.landing .instructors-section h2 {
+  color: #2a1818;
+}
+
+body.landing .instructor-card h3 {
+  color: #2a1818;
+}
+
+body.landing .instructor-card p {
+  color: #7a5550;
+}
+
+/* Difference / feature cards */
+body.landing .difference-card,
+body.landing .feature-item,
+body.landing .tip-card {
+  background: #fff;
+  border-top-color: #c4736a;
+  box-shadow: 0 2px 16px rgba(196, 115, 106, 0.06);
+}
+
+body.landing .difference-card:hover,
+body.landing .feature-item:hover,
+body.landing .tip-card:hover {
+  background: #fff8f7;
+  box-shadow: 0 8px 32px rgba(196, 115, 106, 0.14);
+}
+
+body.landing .difference-card h3,
+body.landing .feature-item h3,
+body.landing .tip-card h3 {
+  color: #c4736a;
+}
+
+body.landing .difference-card p,
+body.landing .feature-item p,
+body.landing .tip-card p {
+  color: #7a5550;
+}
+
+/* Section intros */
+body.landing .section-intro {
+  color: #7a5550;
+}
+
+/* Contact page */
+body.landing .contact-container {
+  background: #faf6f4;
+}
+
+body.landing .contact-form-section h2,
+body.landing .contact-info-section h2 {
+  color: #2a1818;
+}
+
+body.landing .contact-form-section p,
+body.landing .contact-info-section p {
+  color: #7a5550;
+}
+
+body.landing .info-block h3 {
+  color: #c4736a;
+}
+
+body.landing .contact-form {
+  background: #fff;
+  border: 1px solid rgba(196, 115, 106, 0.15);
+  padding: 2.5rem;
+}
+
+/* Parties page */
+body.landing .party-features {
+  background: #f5ece9;
+}
+
+/* Success message */
+body.landing .success-visible {
+  color: #5a8a5a;
+  background: rgba(90, 138, 90, 0.08);
+  border-color: rgba(90, 138, 90, 0.25);
+}
