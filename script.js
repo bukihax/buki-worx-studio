@@ -610,33 +610,37 @@ function initCurtain() {
 
   var leftPanel  = curtain.querySelector('.curtain-left');
   var rightPanel = curtain.querySelector('.curtain-right');
+  var hint       = curtain.querySelector('.curtain-hint');
   var logo       = curtain.querySelector('.curtain-logo');
 
-  var DELAY    = 600;  // ms of branding shown before curtain starts opening
-  var DURATION = 2000; // ms — must match the CSS transition duration
+  var OPEN_AT = window.innerHeight * 0.8;
+  var ticking  = false;
 
-  // Lock the page scroll so the user can't skip past the curtain.
-  document.body.style.overflow = 'hidden';
+  function update() {
+    var progress = Math.min(window.scrollY / OPEN_AT, 1);
 
-  setTimeout(function () {
-    // Fade the logo out as the curtain begins to open.
-    if (logo) {
-      logo.style.transition = 'opacity 0.5s ease';
-      logo.style.opacity    = '0';
-    }
+    var eased = progress < 0.5
+      ? 2 * progress * progress
+      : 1 - Math.pow(-2 * progress + 2, 2) / 2;
 
-    // Trigger the clip-path transitions on both panels simultaneously.
-    leftPanel.classList.add('curtain-open');
-    rightPanel.classList.add('curtain-open');
+    var pct = eased * 100;
+    leftPanel.style.transform  = 'translateX(-' + pct + '%)';
+    rightPanel.style.transform = 'translateX('  + pct + '%)';
 
-    // Once the transition finishes, unlock scroll and remove the curtain.
-    setTimeout(function () {
-      document.body.style.overflow = '';
-      curtain.style.visibility     = 'hidden';
-      curtain.style.pointerEvents  = 'none';
-    }, DURATION + 50);
+    var fadeOut = Math.max(0, 1 - progress * 4);
+    if (hint) hint.style.opacity = String(fadeOut);
+    if (logo) logo.style.opacity = String(fadeOut);
 
-  }, DELAY);
+    curtain.style.visibility = progress >= 1 ? 'hidden' : 'visible';
+
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', function () {
+    if (!ticking) { requestAnimationFrame(update); ticking = true; }
+  }, { passive: true });
+
+  update();
 }
 
 // ── Studio AI Chat ────────────────────────────────────────────────────────────
