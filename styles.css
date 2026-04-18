@@ -1963,3 +1963,376 @@ footer {
     justify-content: center;
   }
 }
+
+/* ===========================
+   CURTAIN ANIMATION
+   =========================== */
+
+#curtain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2000;
+  display: flex;
+  pointer-events: none;
+}
+
+.curtain-panel {
+  height: 100%;
+  width: 50%;
+  will-change: transform;
+  transition: none;
+}
+
+.curtain-left {
+  background:
+    linear-gradient(170deg, rgba(255,255,255,0.18) 0%, transparent 45%),
+    linear-gradient(to right, #bf7d76, #ddb0a8, #f2d4ce, #e6c0b8, #d4a8a0);
+}
+
+.curtain-right {
+  background:
+    linear-gradient(10deg, rgba(255,255,255,0.18) 0%, transparent 45%),
+    linear-gradient(to left, #3d6e79, #5e92a0, #85b8c4, #78adb8, #5e96a2);
+}
+
+/* Centered branding shown on the closed curtain */
+.curtain-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-family: 'Jost', sans-serif;
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  font-weight: 600;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  text-align: center;
+  text-shadow: 0 2px 24px rgba(0,0,0,0.18);
+  white-space: nowrap;
+  will-change: opacity;
+}
+
+.curtain-logo span {
+  display: block;
+  font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+  font-weight: 300;
+  letter-spacing: 7px;
+  margin-top: 0.6rem;
+  opacity: 0.85;
+}
+
+/* Scroll hint */
+.curtain-hint {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.75);
+  font-family: 'Jost', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  will-change: opacity;
+  animation: curtain-bob 2.2s ease-in-out infinite;
+}
+
+.curtain-hint svg {
+  width: 18px;
+  height: 18px;
+}
+
+@keyframes curtain-bob {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%       { transform: translateX(-50%) translateY(7px); }
+}
+
+/* ===========================
+   LANDING PAGE — LIGHT THEME
+   =========================== */
+
+body.landing {
+  background-color: #faf6f4;
+  color: #2a1818;
+  font-family: 'Jost', 'ui-sans-serif', system-ui, -apple-system, sans-serif;
+  font-weight: 300;
+}
+
+/* Typography */
+body.landing h1,
+body.landing h2,
+body.landing h3,
+body.landing h4 {
+  color: #2a1818;
+  font-family: 'Jost', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+body.landing p {
+  color: #7a5550;
+  font-weight: 300;
+}
+
+body.landing a {
+  color: #c4736a;
+}
+
+body.landing a:hover {
+  color: #a85f57;
+}
+
+/* Header */
+body.landing header {
+  background: rgba(250, 246, 244, 0.92);
+  border-bottom-color: rgba(196, 115, 106, 0.15);
+}
+
+body.landing header.nav-hero {
+  background: transparent;
+  border-bottom-color: transparent;
+}
+
+body.landing .logo {
+  color: #c4736a;
+}
+
+body.landing .nav-link {
+  color: #5a3835;
+}
+
+body.landing .nav-link:hover,
+body.landing .nav-link.active {
+  color: #c4736a;
+}
+
+body.landing .nav-link.active::after {
+  background-color: #c4736a;
+}
+
+/* Hero — video sits underneath, overlay is lighter/warmer */
+body.landing .hero {
+  background: #faf6f4;
+}
+
+body.landing .hero-overlay {
+  background: rgba(42, 24, 24, 0.42);
+}
+
+/* Hero text stays white since it's over video */
+body.landing .hero-content h1,
+body.landing .hero-content p {
+  color: #fff;
+}
+
+body.landing .hero-content p {
+  color: rgba(255,255,255,0.85);
+}
+
+/* CTA buttons */
+body.landing .cta-button {
+  background-color: #c4736a;
+  box-shadow: 0 8px 24px rgba(196, 115, 106, 0.35);
+}
+
+body.landing .cta-button:hover {
+  background-color: #a85f57;
+  box-shadow: 0 14px 36px rgba(196, 115, 106, 0.5);
+}
+
+body.landing .cta-button-secondary {
+  color: #c4736a;
+  border-color: #c4736a;
+}
+
+body.landing .cta-button-secondary:hover {
+  background-color: #c4736a;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(196, 115, 106, 0.3);
+}
+
+/* Special offer section */
+body.landing .special-offer {
+  background: linear-gradient(135deg, #f5ece9 0%, #ede3e0 100%);
+}
+
+body.landing .special-offer::before {
+  background: radial-gradient(circle, rgba(196, 115, 106, 0.1) 0%, transparent 70%);
+}
+
+body.landing .offer-card {
+  background: #fff;
+  border: 1px solid rgba(196, 115, 106, 0.18);
+  box-shadow: 0 4px 32px rgba(196, 115, 106, 0.08);
+}
+
+body.landing .offer-card h2 {
+  color: #2a1818;
+}
+
+body.landing .offer-highlight {
+  color: #c4736a;
+}
+
+body.landing .offer-card p {
+  color: #7a5550;
+}
+
+body.landing .promo-code {
+  color: #c4736a;
+  border-color: #c4736a;
+}
+
+/* Benefits section */
+body.landing .benefits {
+  background: #faf6f4;
+  border-bottom-color: rgba(196, 115, 106, 0.1);
+}
+
+body.landing .benefits h2 {
+  color: #2a1818;
+}
+
+body.landing .benefit-card {
+  background: #fff;
+  border-top-color: #c4736a;
+  border-left-color: rgba(196, 115, 106, 0.15);
+  box-shadow: 0 2px 16px rgba(196, 115, 106, 0.06);
+}
+
+body.landing .benefit-card:hover {
+  background: #fff8f7;
+  box-shadow: 0 8px 32px rgba(196, 115, 106, 0.14);
+}
+
+body.landing .benefit-card h3 {
+  color: #c4736a;
+}
+
+body.landing .benefit-card p {
+  color: #7a5550;
+}
+
+/* Footer on landing */
+body.landing footer {
+  background: #2a1818;
+  border-top: 1px solid rgba(196, 115, 106, 0.25);
+}
+
+body.landing footer h4,
+body.landing footer p,
+body.landing footer a {
+  color: #d4b4b0;
+}
+
+body.landing footer a:hover {
+  color: #e8c8c4;
+}
+
+body.landing .footer-bottom p {
+  color: #7a5550;
+}
+
+/* Form inputs on landing */
+body.landing input,
+body.landing textarea {
+  background: #fff;
+  border-color: rgba(196, 115, 106, 0.3);
+  color: #2a1818;
+  font-family: 'Jost', sans-serif;
+  font-weight: 300;
+}
+
+body.landing input::placeholder,
+body.landing textarea::placeholder {
+  color: #b09090;
+}
+
+body.landing input:focus,
+body.landing textarea:focus {
+  border-color: #c4736a;
+  box-shadow: 0 0 0 3px rgba(196, 115, 106, 0.12);
+}
+
+body.landing label {
+  color: #5a3835;
+  font-family: 'Jost', sans-serif;
+  font-weight: 500;
+}
+
+/* Chat widget on landing */
+body.landing .chat-toggle {
+  background: #c4736a;
+  box-shadow: 0 4px 20px rgba(196, 115, 106, 0.4);
+}
+
+body.landing .chat-toggle:hover {
+  background: #a85f57;
+}
+
+body.landing .chat-panel {
+  background: #fff;
+  border-color: rgba(196, 115, 106, 0.2);
+}
+
+body.landing .chat-header {
+  background: rgba(196, 115, 106, 0.08);
+  border-bottom-color: rgba(196, 115, 106, 0.15);
+}
+
+body.landing .chat-message--user {
+  background: rgba(196, 115, 106, 0.12);
+  border-color: rgba(196, 115, 106, 0.25);
+  color: #2a1818;
+}
+
+body.landing .chat-message--assistant {
+  background: #f5ece9;
+  border-color: rgba(196, 115, 106, 0.1);
+  color: #2a1818;
+}
+
+body.landing .chat-form {
+  border-top-color: rgba(196, 115, 106, 0.1);
+}
+
+body.landing .chat-form input {
+  color: #2a1818;
+}
+
+body.landing .chat-form input::placeholder {
+  color: #b09090;
+}
+
+body.landing .chat-send {
+  color: #c4736a;
+  border-left-color: rgba(196, 115, 106, 0.1);
+}
+
+body.landing .chat-suggestion {
+  border-color: rgba(196, 115, 106, 0.35);
+  color: #c4736a;
+}
+
+body.landing .chat-suggestion:hover {
+  background: rgba(196, 115, 106, 0.1);
+  color: #2a1818;
+}
+
+body.landing .chat-powered-by {
+  color: #b09090;
+}
+
+/* Field errors on landing */
+body.landing .field-error {
+  color: #a85f57;
+}

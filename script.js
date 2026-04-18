@@ -599,6 +599,54 @@ function initLeadGen() {
   });
 }
 
+// ── Curtain ───────────────────────────────────────────────────────────────────
+// Two silk-gradient panels cover the homepage on load. Scrolling drives them
+// apart via translateX so the hero video is gradually revealed underneath.
+// Uses the same rAF ticking pattern as initParallax for 60fps performance.
+
+function initCurtain() {
+  var curtain = document.getElementById('curtain');
+  if (!curtain) return;
+
+  var leftPanel  = curtain.querySelector('.curtain-left');
+  var rightPanel = curtain.querySelector('.curtain-right');
+  var hint       = curtain.querySelector('.curtain-hint');
+  var logo       = curtain.querySelector('.curtain-logo');
+
+  // Curtain fully open by the time user scrolls 80% of one viewport height.
+  var OPEN_AT = window.innerHeight * 0.8;
+  var ticking  = false;
+
+  function update() {
+    var progress = Math.min(window.scrollY / OPEN_AT, 1); // 0 → 1
+
+    // Ease-in-out quad so the curtain starts slow, accelerates, then settles.
+    var eased = progress < 0.5
+      ? 2 * progress * progress
+      : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+    var pct = eased * 100;
+    leftPanel.style.transform  = 'translateX(-' + pct + '%)';
+    rightPanel.style.transform = 'translateX('  + pct + '%)';
+
+    // Fade hint and logo out quickly as scrolling starts.
+    var fadeOut = Math.max(0, 1 - progress * 4);
+    if (hint) hint.style.opacity  = String(fadeOut);
+    if (logo) logo.style.opacity  = String(fadeOut);
+
+    // Once fully open, hide so it never intercepts repaint.
+    curtain.style.visibility = progress >= 1 ? 'hidden' : 'visible';
+
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', function () {
+    if (!ticking) { requestAnimationFrame(update); ticking = true; }
+  }, { passive: true });
+
+  update(); // run once in case page loads already scrolled
+}
+
 // ── Studio AI Chat ────────────────────────────────────────────────────────────
 // Floating chat widget that calls a locally running Ollama model (llama3.2).
 // Responses are streamed token-by-token via the Ollama /api/chat streaming
@@ -802,6 +850,7 @@ if (typeof module !== 'undefined' && module.exports) {
     init();
     initA11y();
     initLeadGen();
+    initCurtain();
     initParallax();
     initScrollReveal();
     initEditorialNav();
