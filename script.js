@@ -242,13 +242,9 @@ function initA11y() {
   var prefs = a11yLoadPrefs();
   a11yApplyPrefs(prefs);
 
-  // ── Inject a nav item into the existing navbar ────────────────────────────
-  // Every page loads this script and has a .nav-menu <ul> — we add one <li>.
-  var navMenu = document.querySelector('.nav-menu');
-  if (!navMenu) return; // safety: no nav on this page
-
-  var navItem = document.createElement('li');
-  navItem.id = 'a11y-nav-item';
+  // ── Inject into the pre-existing #a11y-nav-item placeholder in .nav-utils ──
+  var navItem = document.getElementById('a11y-nav-item');
+  if (!navItem) return;
 
   navItem.innerHTML =
     '<button id="a11y-toggle" aria-label="Open accessibility menu" ' +
@@ -280,7 +276,7 @@ function initA11y() {
 
     '</div>';
 
-  navMenu.appendChild(navItem);
+  // navItem already exists in DOM — innerHTML populated above
 
   // ── Panel open/close helpers ──────────────────────────────────────────────
   var toggleBtn = document.getElementById('a11y-toggle');
@@ -632,9 +628,13 @@ function initCurtain() {
 
   var ctx = canvas.getContext('2d');
 
-  // Virtual scroll bucket — how many px of wheel input opens the curtain fully.
-  var TOTAL       = 700;
-  var accumulated = 0;
+  // THRESHOLD — user must scroll this many px before the curtain starts opening.
+  // This prevents accidental triggers from tiny scroll gestures on load.
+  // TOTAL — additional px of scroll needed to fully open after threshold is passed.
+  var THRESHOLD   = 120;
+  var TOTAL       = 800;
+  var rawScroll   = 0; // total wheel input received (including threshold)
+  var accumulated = 0; // progress input (only counts past the threshold)
   var done        = false;
   var ticking     = false;
 
@@ -730,7 +730,9 @@ function initCurtain() {
     var delta = e.deltaMode === 1 ? e.deltaY * 40
               : e.deltaMode === 2 ? e.deltaY * 800
               : e.deltaY;
-    accumulated = Math.min(TOTAL, Math.max(0, accumulated + delta));
+    rawScroll = Math.max(0, rawScroll + delta);
+    // Only start opening after threshold is crossed
+    accumulated = Math.min(TOTAL, Math.max(0, rawScroll - THRESHOLD));
     if (!ticking) { requestAnimationFrame(update); ticking = true; }
   }, { passive: false });
 
@@ -745,7 +747,8 @@ function initCurtain() {
     e.preventDefault();
     var dy = lastTouchY - e.touches[0].clientY;
     lastTouchY = e.touches[0].clientY;
-    accumulated = Math.min(TOTAL, Math.max(0, accumulated + dy * 2.5));
+    rawScroll = Math.max(0, rawScroll + dy * 2.5);
+    accumulated = Math.min(TOTAL, Math.max(0, rawScroll - THRESHOLD));
     if (!ticking) { requestAnimationFrame(update); ticking = true; }
   }, { passive: false });
 }
