@@ -595,6 +595,21 @@ function initLeadGen() {
       localStorage.setItem(LEAD_KEY, '1');
       form.hidden = true;
       claimedEl.hidden = false;
+
+      // If the user is logged in, also save their promo claim to Supabase.
+      // This is the cloud database write — replaces relying on localStorage alone.
+      // .update() modifies an existing row; .eq() targets their specific user row.
+      if (typeof supabaseClient !== 'undefined') {
+        supabaseClient.auth.getSession().then(function (result) {
+          var session = result.data.session;
+          if (session) {
+            supabaseClient
+              .from('profiles')
+              .update({ promo_claimed: true })
+              .eq('id', session.user.id);
+          }
+        });
+      }
     }, 300);
   });
 }

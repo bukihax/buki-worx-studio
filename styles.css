@@ -1735,6 +1735,110 @@ footer {
   line-height: 2.5 !important;
 }
 
+/* ===========================
+   AUTH PAGE
+   =========================== */
+
+.auth-section {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 4rem 1.5rem 6rem;
+  min-height: 60vh;
+}
+
+.auth-card {
+  background: #fff;
+  border: 1px solid rgba(196, 115, 106, 0.18);
+  border-radius: 4px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 8px 32px rgba(42, 24, 24, 0.08);
+}
+
+/* Tab switcher */
+.auth-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid rgba(196, 115, 106, 0.2);
+}
+
+.auth-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 0.75rem 1rem;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #7a5550;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.auth-tab.active {
+  color: #c4736a;
+  border-bottom-color: #c4736a;
+}
+
+/* Auth forms */
+.auth-form h2 {
+  font-size: 1.4rem;
+  color: #2a1818;
+  margin-bottom: 1.5rem;
+}
+
+/* Logged-in panel */
+.auth-logged-in {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.auth-welcome h2 {
+  font-size: 1.4rem;
+  color: #2a1818;
+  margin-bottom: 0.5rem;
+}
+
+.auth-email {
+  color: #c4736a;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.auth-subtext {
+  color: #7a5550;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.auth-promo-status {
+  margin: 1.25rem 0;
+  padding: 1rem;
+  border-radius: 4px;
+  background: rgba(196, 115, 106, 0.06);
+}
+
+.promo-claimed-badge {
+  color: #2a7a4a;
+  font-weight: 600;
+}
+
+.promo-unclaimed {
+  color: #7a5550;
+}
+
+.promo-unclaimed a {
+  color: #c4736a;
+  font-weight: 600;
+}
+
 /* — Text Align (force left on centred elements) — */
 .a11y-text-align h1,
 .a11y-text-align h2,
