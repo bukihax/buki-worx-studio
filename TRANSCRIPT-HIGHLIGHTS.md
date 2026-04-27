@@ -31,3 +31,21 @@ When the project was getting more complex, Claude suggested switching to React f
 ### 5. Integrating Supabase Auth and cloud database (Session 3)
 
 Adding user authentication meant learning a new service mid-project. Claude walked me through creating a Supabase project, writing SQL to create the profiles table, enabling Row Level Security with a policy, and writing a database trigger that auto-creates a profile row on sign up. I ran each SQL block in the Supabase SQL Editor and verified the output before moving to the JavaScript integration. Breaking backend setup into discrete, testable steps made a complex feature feel manageable.
+
+---
+
+### 6. Diagnosing the empty project on resume (Session 4, early)
+
+When we resumed work the local project folder was completely empty even though the site existed on GitHub. We traced it to the repo never being cloned locally — ran `git fetch` and `git checkout main` to pull it down. This showed how important it is to verify your local environment matches the remote before starting any work.
+
+---
+
+### 7. Debugging the modal and chat panel hidden attribute bug (Session 4)
+
+Both the booking modal and the AI chat panel wouldn't close after being opened. The root cause was identical in both: CSS `display: flex` overrides the HTML `hidden` attribute — the browser's built-in `display: none` for `hidden` loses to author CSS. Fixed the modal with an `is-open` class toggle and the chat panel with `.chat-panel:not([hidden]) { display: flex }`. The same bug appearing twice on two different components showed why understanding the root cause matters more than just patching symptoms.
+
+---
+
+### 8. Building full CRUD for bookings (Session 4, late)
+
+The booking feature had Create, Read, and Cancel but no Edit — which meant it didn't satisfy the CRUD requirement for Complete Tier. I caught this gap by checking the work against the rubric. Added an inline edit form per booking card that saves updated notes to Supabase with `.update()`, completing the full Create/Read/Update/Delete cycle. This is an example of using the rubric as a checklist to find missing requirements before submitting.
