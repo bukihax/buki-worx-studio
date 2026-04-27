@@ -194,9 +194,9 @@
         </div>
     </div>
     <!-- Booking Modal -->
-    <div id="booking-modal" class="modal-overlay" hidden>
+    <div id="booking-modal" class="modal-overlay">
         <div class="modal-card">
-            <button class="modal-close" id="modal-close-btn" aria-label="Close">&times;</button>
+            <button class="modal-close" id="modal-close-btn" aria-label="Close">&#x2715;</button>
             <h2 id="modal-class-title">Book a Class</h2>
             <form id="booking-form" novalidate>
                 <div class="form-group">
@@ -268,14 +268,14 @@
                     selectedClass = btn.dataset.class;
                     titleEl.textContent = 'Book: ' + selectedClass;
                     clearForm();
-                    modal.hidden = false;
-                    document.body.style.overflow = 'hidden'; // prevent background scroll
+                    modal.classList.add('is-open');
+                    document.body.style.overflow = 'hidden';
                 });
             });
         });
 
         function closeModal() {
-            modal.hidden = true;
+            modal.classList.remove('is-open');
             document.body.style.overflow = '';
         }
 
