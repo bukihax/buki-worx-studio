@@ -2842,8 +2842,38 @@ body.landing .success-visible {
   font-style: italic;
 }
 
-.booking-card .cta-button-secondary {
+.booking-actions {
+  display: flex;
+  gap: 0.5rem;
   margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.booking-card .cta-button-secondary,
+.booking-card .cta-button {
   font-size: 0.85rem;
   padding: 0.4rem 1rem;
+}
+
+.edit-form {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f0e8e6;
+}
+
+.edit-notes-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+  resize: vertical;
+  margin-bottom: 0.5rem;
+}
+
+.edit-form-actions {
+  display: flex;
+  gap: 0.5rem;
 }

@@ -247,25 +247,79 @@
                         var statusBadge = isCancelled
                             ? '<span class="status-badge status-cancelled">Cancelled</span>'
                             : '<span class="status-badge status-upcoming">Upcoming</span>';
-                        var cancelBtn = isCancelled
-                            ? ''
-                            : '<button class="cta-button-secondary cancel-btn" data-id="' + b.id + '">Cancel</button>';
+                        var actions = isCancelled ? '' : (
+                            '<div class="booking-actions">' +
+                            '<button class="cta-button-secondary edit-btn" data-id="' + b.id + '" data-notes="' + (b.notes || '').replace(/"/g, '&quot;') + '">Edit Notes</button>' +
+                            '<button class="cta-button-secondary cancel-btn" data-id="' + b.id + '">Cancel</button>' +
+                            '</div>'
+                        );
+                        // Inline edit form — hidden until Edit Notes is clicked
+                        var editForm = isCancelled ? '' : (
+                            '<div class="edit-form" id="edit-' + b.id + '" style="display:none">' +
+                            '<textarea class="edit-notes-input" rows="2" placeholder="Update your notes…">' + (b.notes || '') + '</textarea>' +
+                            '<div class="edit-form-actions">' +
+                            '<button class="cta-button save-notes-btn" data-id="' + b.id + '">Save</button>' +
+                            '<button class="cta-button-secondary discard-btn" data-id="' + b.id + '">Discard</button>' +
+                            '</div>' +
+                            '<span class="field-error edit-error" id="edit-err-' + b.id + '"></span>' +
+                            '</div>'
+                        );
                         return (
-                            '<div class="booking-card' + (isCancelled ? ' booking-card--cancelled' : '') + '">' +
+                            '<div class="booking-card' + (isCancelled ? ' booking-card--cancelled' : '') + '" id="card-' + b.id + '">' +
                             '<div class="booking-card-header">' +
                             '<strong>' + b.class_name + '</strong>' + statusBadge +
                             '</div>' +
                             '<p>' + formatDate(b.date) + ' &middot; ' + b.time + '</p>' +
-                            (b.notes ? '<p class="booking-notes">' + b.notes + '</p>' : '') +
-                            cancelBtn +
+                            '<p class="booking-notes" id="notes-' + b.id + '">' + (b.notes || '<em style="color:#aaa">No notes</em>') + '</p>' +
+                            actions + editForm +
                             '</div>'
                         );
                     }).join('');
 
-                    // Attach cancel handlers to each cancel button
+                    // Cancel handlers
                     list.querySelectorAll('.cancel-btn').forEach(function (btn) {
                         btn.addEventListener('click', function () {
                             cancelBooking(btn.dataset.id, userId);
+                        });
+                    });
+
+                    // Edit Notes — toggle the inline form
+                    list.querySelectorAll('.edit-btn').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            var id = btn.dataset.id;
+                            var form = document.getElementById('edit-' + id);
+                            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+                        });
+                    });
+
+                    // Save updated notes to Supabase
+                    list.querySelectorAll('.save-notes-btn').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            var id = btn.dataset.id;
+                            var newNotes = document.querySelector('#edit-' + id + ' .edit-notes-input').value.trim();
+                            var errEl = document.getElementById('edit-err-' + id);
+                            btn.disabled = true; btn.textContent = 'Saving…';
+
+                            supabaseClient.from('bookings')
+                                .update({ notes: newNotes })
+                                .eq('id', id)
+                                .then(function (result) {
+                                    btn.disabled = false; btn.textContent = 'Save';
+                                    if (result.error) {
+                                        errEl.textContent = 'Save failed: ' + result.error.message;
+                                        return;
+                                    }
+                                    // Update the notes display inline without reloading the whole list
+                                    document.getElementById('notes-' + id).innerHTML = newNotes || '<em style="color:#aaa">No notes</em>';
+                                    document.getElementById('edit-' + id).style.display = 'none';
+                                });
+                        });
+                    });
+
+                    // Discard — just hide the form
+                    list.querySelectorAll('.discard-btn').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            document.getElementById('edit-' + btn.dataset.id).style.display = 'none';
                         });
                     });
                 });
