@@ -56,6 +56,7 @@
                         <div class="class-meta">
                             <p><strong>Frequency:</strong> 2-3x per week</p>
                         </div>
+                        <button class="cta-button book-btn" data-class="Intro to Pole">Book This Class</button>
                     </div>
 
                     <!-- Pole Fitness -->
@@ -73,6 +74,7 @@
                         <div class="class-meta">
                             <p><strong>Frequency:</strong> 2-3x per week</p>
                         </div>
+                        <button class="cta-button book-btn" data-class="Pole Fitness">Book This Class</button>
                     </div>
 
                     <!-- Heels Class -->
@@ -90,6 +92,7 @@
                         <div class="class-meta">
                             <p><strong>Frequency:</strong> 1-2x per week</p>
                         </div>
+                        <button class="cta-button book-btn" data-class="Heels Class">Book This Class</button>
                     </div>
 
                     <!-- Silks -->
@@ -107,6 +110,7 @@
                         <div class="class-meta">
                             <p><strong>Frequency:</strong> 2x per week</p>
                         </div>
+                        <button class="cta-button book-btn" data-class="Silks">Book This Class</button>
                     </div>
 
                     <!-- Glutes & Abs -->
@@ -124,6 +128,7 @@
                         <div class="class-meta">
                             <p><strong>Frequency:</strong> 1-3x per week</p>
                         </div>
+                        <button class="cta-button book-btn" data-class="Glutes & Abs">Book This Class</button>
                     </div>
                 </div>
             </div>
@@ -188,9 +193,163 @@
             <p class="chat-powered-by">Powered by Ollama &middot; llama3.2</p>
         </div>
     </div>
+    <!-- Booking Modal -->
+    <div id="booking-modal" class="modal-overlay" hidden>
+        <div class="modal-card">
+            <button class="modal-close" id="modal-close-btn" aria-label="Close">&times;</button>
+            <h2 id="modal-class-title">Book a Class</h2>
+            <form id="booking-form" novalidate>
+                <div class="form-group">
+                    <label for="booking-date">Date</label>
+                    <input type="date" id="booking-date" required />
+                    <span class="field-error" id="booking-date-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="booking-time">Preferred Time</label>
+                    <select id="booking-time" required>
+                        <option value="">Select a time</option>
+                        <option value="9:00 AM">9:00 AM</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                        <option value="1:00 PM">1:00 PM</option>
+                        <option value="3:00 PM">3:00 PM</option>
+                        <option value="5:00 PM">5:00 PM</option>
+                        <option value="7:00 PM">7:00 PM</option>
+                    </select>
+                    <span class="field-error" id="booking-time-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="booking-notes">Notes (optional)</label>
+                    <textarea id="booking-notes" rows="3" placeholder="Any injuries, questions, or special requests?"></textarea>
+                </div>
+                <div class="form-success" id="booking-success"></div>
+                <div class="field-error" id="booking-error"></div>
+                <button type="submit" class="cta-button" id="booking-submit-btn">Confirm Booking</button>
+            </form>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-client.js"></script>
     <script src="auth.js"></script>
     <script src="script.js"></script>
+    <script>
+    // ── Booking Modal Logic ───────────────────────────────────────────────────
+    // When a user clicks "Book This Class", we:
+    //   1. Check if they're logged in — if not, send them to the login page
+    //   2. Open a modal with a date/time picker
+    //   3. On submit, write a row to the Supabase `bookings` table
+    //   4. That row stores their user_id so only they can see it (RLS enforces this)
+
+    (function () {
+        var modal     = document.getElementById('booking-modal');
+        var closeBtn  = document.getElementById('modal-close-btn');
+        var form      = document.getElementById('booking-form');
+        var titleEl   = document.getElementById('modal-class-title');
+        var submitBtn = document.getElementById('booking-submit-btn');
+        var selectedClass = '';
+
+        // Set today as the minimum selectable date so users can't book in the past
+        var today = new Date().toISOString().split('T')[0];
+        document.getElementById('booking-date').min = today;
+
+        // Every "Book This Class" button stores the class name in data-class
+        document.querySelectorAll('.book-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                // Check auth state before opening modal
+                // getSession() reads the stored JWT token — no network call needed
+                supabaseClient.auth.getSession().then(function (result) {
+                    if (!result.data.session) {
+                        // Not logged in — redirect to login page
+                        // We store the intended destination so we could redirect back (not implemented here)
+                        window.location.href = 'signup.html';
+                        return;
+                    }
+                    // Logged in — open modal pre-filled with this class name
+                    selectedClass = btn.dataset.class;
+                    titleEl.textContent = 'Book: ' + selectedClass;
+                    clearForm();
+                    modal.hidden = false;
+                    document.body.style.overflow = 'hidden'; // prevent background scroll
+                });
+            });
+        });
+
+        function closeModal() {
+            modal.hidden = true;
+            document.body.style.overflow = '';
+        }
+
+        closeBtn.addEventListener('click', closeModal);
+
+        // Close if user clicks the dark overlay outside the card
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) closeModal();
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !modal.hidden) closeModal();
+        });
+
+        function clearForm() {
+            form.reset();
+            document.getElementById('booking-date-error').textContent = '';
+            document.getElementById('booking-time-error').textContent = '';
+            document.getElementById('booking-error').textContent = '';
+            document.getElementById('booking-success').textContent = '';
+        }
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            var date  = document.getElementById('booking-date').value;
+            var time  = document.getElementById('booking-time').value;
+            var notes = document.getElementById('booking-notes').value.trim();
+            var dateErr = document.getElementById('booking-date-error');
+            var timeErr = document.getElementById('booking-time-error');
+            var errEl   = document.getElementById('booking-error');
+            var successEl = document.getElementById('booking-success');
+
+            // Clear previous errors
+            dateErr.textContent = timeErr.textContent = errEl.textContent = successEl.textContent = '';
+
+            // Validate
+            var valid = true;
+            if (!date) { dateErr.textContent = 'Please pick a date.'; valid = false; }
+            if (!time) { timeErr.textContent = 'Please pick a time.'; valid = false; }
+            if (!valid) return;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Booking…';
+
+            // Get the logged-in user's ID to attach to the booking row
+            supabaseClient.auth.getSession().then(function (result) {
+                var userId = result.data.session.user.id;
+
+                // Insert a new row into the `bookings` table
+                // Supabase RLS ensures only this user can read/update this row
+                supabaseClient.from('bookings').insert({
+                    user_id:    userId,
+                    class_name: selectedClass,
+                    date:       date,
+                    time:       time,
+                    notes:      notes || '',
+                    status:     'upcoming'
+                }).then(function (result) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Confirm Booking';
+
+                    if (result.error) {
+                        errEl.textContent = 'Booking failed: ' + result.error.message;
+                        return;
+                    }
+
+                    successEl.textContent = '✓ Booked! View it in My Account.';
+                    setTimeout(closeModal, 2000);
+                });
+            });
+        });
+    })();
+    </script>
 </body>
 </html>

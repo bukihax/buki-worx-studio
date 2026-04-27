@@ -90,6 +90,16 @@
 
             </div>
         </section>
+
+        <!-- My Bookings — only visible when logged in -->
+        <section class="content-section" id="my-bookings-section" hidden>
+            <div class="content-wrapper">
+                <h2>My Bookings</h2>
+                <div id="bookings-list">
+                    <p id="bookings-loading">Loading your bookings…</p>
+                </div>
+            </div>
+        </section>
     </main>
 
     <footer>
@@ -184,10 +194,11 @@
             loggedInEl.hidden = false;
             userEmailEl.textContent = user.email;
 
-            // Query Supabase Firestore for this user's promo status
-            // .from('profiles') — the table we created in the SQL Editor
-            // .eq('id', user.id) — WHERE id = logged-in user's UUID
-            // .single() — expect exactly one row back
+            // Show the My Bookings section and load the user's bookings
+            document.getElementById('my-bookings-section').hidden = false;
+            loadBookings(user.id);
+
+            // Query Supabase for this user's promo status
             supabaseClient
                 .from('profiles')
                 .select('promo_claimed')
@@ -202,6 +213,87 @@
                             '<p class="promo-unclaimed">Haven\'t claimed your free class yet? <a href="index.html">Claim it on the homepage.</a></p>';
                     }
                 });
+        }
+
+        // ── My Bookings ───────────────────────────────────────────────────────
+        // Fetches all bookings for this user from Supabase, ordered by date.
+        // Because of Row Level Security (RLS) on the `bookings` table, Supabase
+        // automatically filters to only rows where user_id = logged-in user.
+        // Users literally cannot access each other's rows — the database enforces it.
+        function loadBookings(userId) {
+            var list = document.getElementById('bookings-list');
+
+            supabaseClient
+                .from('bookings')
+                .select('*')
+                .eq('user_id', userId)
+                .order('date', { ascending: true })
+                .then(function (result) {
+                    if (result.error) {
+                        list.innerHTML = '<p class="field-error">Could not load bookings: ' + result.error.message + '</p>';
+                        return;
+                    }
+
+                    var bookings = result.data;
+
+                    if (!bookings || bookings.length === 0) {
+                        list.innerHTML = '<p>No bookings yet. <a href="classes.html">Browse classes</a> to book your first session.</p>';
+                        return;
+                    }
+
+                    // Build a card for each booking
+                    list.innerHTML = bookings.map(function (b) {
+                        var isCancelled = b.status === 'cancelled';
+                        var statusBadge = isCancelled
+                            ? '<span class="status-badge status-cancelled">Cancelled</span>'
+                            : '<span class="status-badge status-upcoming">Upcoming</span>';
+                        var cancelBtn = isCancelled
+                            ? ''
+                            : '<button class="cta-button-secondary cancel-btn" data-id="' + b.id + '">Cancel</button>';
+                        return (
+                            '<div class="booking-card' + (isCancelled ? ' booking-card--cancelled' : '') + '">' +
+                            '<div class="booking-card-header">' +
+                            '<strong>' + b.class_name + '</strong>' + statusBadge +
+                            '</div>' +
+                            '<p>' + formatDate(b.date) + ' &middot; ' + b.time + '</p>' +
+                            (b.notes ? '<p class="booking-notes">' + b.notes + '</p>' : '') +
+                            cancelBtn +
+                            '</div>'
+                        );
+                    }).join('');
+
+                    // Attach cancel handlers to each cancel button
+                    list.querySelectorAll('.cancel-btn').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            cancelBooking(btn.dataset.id, userId);
+                        });
+                    });
+                });
+        }
+
+        // Updates the booking's status to 'cancelled' in Supabase, then reloads the list.
+        // We do a soft cancel (update status) rather than deleting the row so the
+        // booking history is preserved and the user can see what they cancelled.
+        function cancelBooking(bookingId, userId) {
+            supabaseClient
+                .from('bookings')
+                .update({ status: 'cancelled' })
+                .eq('id', bookingId)
+                .then(function (result) {
+                    if (result.error) {
+                        alert('Could not cancel: ' + result.error.message);
+                        return;
+                    }
+                    loadBookings(userId); // refresh the list
+                });
+        }
+
+        // Formats an ISO date string ("2025-06-15") to "Jun 15, 2025"
+        // We add 'T00:00:00' to force local timezone — without it, JS parses the
+        // date as UTC midnight which can display one day behind in US timezones.
+        function formatDate(iso) {
+            var d = new Date(iso + 'T00:00:00');
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
 
         // Login form — signInWithPassword verifies credentials against Supabase Auth
