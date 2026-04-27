@@ -395,7 +395,7 @@
                 .then(function (result) {
                     btn.disabled = false; btn.textContent = 'Create Account';
                     if (result.error) { emailErr.textContent = result.error.message; }
-                    else { success.textContent = 'Account created! Check your email to confirm, then log in.'; }
+                    else { success.textContent = 'Account created! Redirecting…'; setTimeout(function () { window.location.href = 'index.html'; }, 1000); }
                 });
         });
 
